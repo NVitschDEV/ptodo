@@ -2,7 +2,7 @@
 
 # --- Configuration ---
 REPO_URL="https://github.com/NVitschDEV/TODOAPP.git"
-INSTALL_DIR="$HOME"
+INSTALL_DIR=""
 BASH_RC="$HOME/.bashrc"
 # The specific line you want to add (e.g., adding to PATH or sourcing a script)
 CONFIG_LINE="alias='python3 $HOME/TODOAPP/TODOLIST.py"
