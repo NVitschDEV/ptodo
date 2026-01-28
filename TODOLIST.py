@@ -41,11 +41,13 @@ def remove_task():
     show_todo()
     print("--------------------------")
     task_remove = input("")
-    
-    if task_remove in todos:
-        todos.remove(task_remove)
-    else:
-        print("This is not a valid input")
+    while 1 == 1:
+        if task_remove in todos:
+            todos.remove(task_remove)
+        elif task_remove == exit:
+            break
+        else:
+            print("This is not a valid input")
 
 
 def app():
