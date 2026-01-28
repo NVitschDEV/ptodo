@@ -39,7 +39,9 @@ def add_task():
 
 def remove_task():
     show_todo()
+    print("--------------------------")
     task_remove = input("")
+    
     if task_remove in todos:
         todos.remove(task_remove)
     else:
