@@ -21,6 +21,11 @@ else:
     todos = []
 
 
+def show_todo():
+    for i in todos:
+        print(i)
+
+
 def add_task():
     hans = 1
     print("Add your Task here, write exit to exit!")
@@ -32,12 +37,8 @@ def add_task():
             todos.append(task)
 
 
-def show_todo():
-    print(todos)
-
-
 def remove_task():
-    print(todos)
+    show_todo()
     task_remove = input("")
     if task_remove in todos:
         todos.remove(task_remove)
