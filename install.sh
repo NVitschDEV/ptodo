@@ -1,3 +1,5 @@
+#/bin/bash
+
 BASH_RC="$HOME/.bashrc"
 CONFIG_LINE="alias todo='python3 $HOME/TODOAPP/TODOLIST.py'"
 
