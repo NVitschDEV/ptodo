@@ -56,11 +56,11 @@ def get_task_table(todos):
 def print_header():
     os.system("cls" if os.name == "nt" else "clear")
     logo = """
-    [bold red]___________________  ________    ________  .____     .___  ____________________[/bold red]
-    [bold red]\__    ___/\_____  \ \______ \   \_____  \ |    |    |   |/     _____/\__    ___/[/bold red]
-    [bold blue1]  |    |    /   |   \ |    |  \   /   |   \|    |    |   |\_____  \   |    |[/bold blue1]
-    [bold blue]  |    |   /    |    \|    `   \ /    |    \    |___ |   |/        \  |    |[/bold blue]
-    [bold blue]  |____|   \_______  /_______  / \_______  /_______ \___/_______  /  |____|[/bold blue]
+    [bold red]___________________  ________    ________  .____    .___  ____________________[/bold red]
+    [bold red]\__    ___/\_____  \ \______ \   \_____  \ |    |   |   |/     _____/\__    ___/[/bold red]
+    [bold blue1]  |    |    /   |   \ |    |  \   /   |   \|    |   |   |\_____  \     |    |[/bold blue1]
+    [bold blue]  |    |   /    |    \|    `   \ /    |    \    |___|   |/        \    |    |[/bold blue]
+    [bold blue]  |____|   \_______  /_______  / \_______  /_______ \___/_______  /    |____|[/bold blue]
     [dim]                   \/        \/          \/        \/           \/[/dim]
     """
     console.print(Align.center(logo))
