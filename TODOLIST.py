@@ -21,16 +21,7 @@ menu = r"""
 ║     [1] ADD    [2] REMOVE   [3] SHOW     ║
 ╚══════════════════════════════════════════╝
 """
-
-top_menu = r"""
-╔══════════════════════════════════════════╗
-"""
-middle_menu = r"""
-╠══════════════════════════════════════════╣
-"""
-bottom_menu = r"""
-╚══════════════════════════════════════════╝
-"""
+BOX_WIDTH = 40
 
 FILENAME = "TODOLIST.pkl"
 
@@ -42,11 +33,12 @@ else:
     todos = []
 
 
-def show_todo():
-    print(top_menu)
-    for i in todos:
-        print(f"║       {i}       ║")
-    print(bottom_menu)
+def show_todo(items):
+    print("\n3\n")
+    print("╔" + "═" * (BOX_WIDTH + 2) + "╗")
+    for item in items:
+        print(f"║ {item:^{BOX_WIDTH}} ║")
+    print("╚" + "═" * (BOX_WIDTH + 2) + "╝")
 
 
 def add_task():
@@ -61,8 +53,7 @@ def add_task():
 
 
 def remove_task():
-    show_todo()
-    print(top_menu)
+    show_todo(todos)
     while 1 == 1:
         task_remove = input("")
         if task_remove in todos:
@@ -82,7 +73,7 @@ def app():
         elif s1 == "2":
             remove_task()
         elif s1 == "3":
-            show_todo()
+            show_todo(todos)
         elif s1 == "exit":
             break
         else:
