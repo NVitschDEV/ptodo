@@ -13,7 +13,7 @@ print_msg() {
 print_error() {
     echo -e "${RED}[ERROR]${RESET} $1"
 }
-
+sudo pacman -S python-rich
 
 
 BASH_RC="$HOME/.bashrc"
