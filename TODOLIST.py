@@ -23,7 +23,7 @@ menu = r"""
 """
 
 
-FILENAME = "hansimglück.pkl"
+FILENAME = "TODOLIST.pkl"
 
 # Load todos
 if os.path.exists(FILENAME):
