@@ -43,8 +43,10 @@ else:
 
 
 def show_todo():
+    print(top_menu)
     for i in todos:
-        print(i)
+        print(f"║       {i}       ║")
+    print(bottom_menu)
 
 
 def add_task():
@@ -60,7 +62,7 @@ def add_task():
 
 def remove_task():
     show_todo()
-    print("--------------------------")
+    print(top_menu)
     while 1 == 1:
         task_remove = input("")
         if task_remove in todos:
