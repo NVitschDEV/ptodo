@@ -22,3 +22,6 @@ Then simply run the install script:
 ```bash
 ~/TODOAPP/install.sh
 ```
+
+
+Please dont try the uninstall script it is in the betaphase. :)
