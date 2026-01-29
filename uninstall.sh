@@ -39,6 +39,8 @@ else
     print_error "$BASH_RC not found."
 fi
 
+sudo pacman -R python-rich
+
 # 2. Remove the Application Directory
 if [ -d "$APP_DIR" ]; then
     echo "Removing application directory: $APP_DIR"
