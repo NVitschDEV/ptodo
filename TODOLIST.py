@@ -13,6 +13,17 @@ ___________________  ________   ________  .____    .___  ____________________
 """
 print(logo)
 
+
+def menu():
+    print(r"""
+    ╔══════════════════════════════════════════╗
+    ║       WHAT WOULD YOU LIKE TO DO?         ║
+    ╠══════════════════════════════════════════╣
+    ║     [1] ADD    [2] REMOVE   [3] SHOW     ║
+    ╚══════════════════════════════════════════╝
+    """)
+
+
 FILENAME = "hansimglück.pkl"
 
 # Load todos
@@ -42,11 +53,11 @@ def add_task():
 def remove_task():
     show_todo()
     print("--------------------------")
-    task_remove = input("")
     while 1 == 1:
+        task_remove = input("")
         if task_remove in todos:
             todos.remove(task_remove)
-        elif task_remove == exit:
+        elif task_remove == "exit":
             break
         else:
             print("This is not a valid input")
@@ -54,13 +65,7 @@ def remove_task():
 
 def app():
     while 1 == 1:
-        print("--------------------------")
-        print("What would you like to do?")
-        print("--------------------------")
-        print("1 (add a task)")
-        print("2 (remove a task)")
-        print("3 (show todolist)")
-        print("--------------------------")
+        menu()
         s1 = input("")
         if s1 == "1":
             add_task()
