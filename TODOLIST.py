@@ -146,5 +146,4 @@ def app():
             break
 
 
-if __name__ == "__main__":
-    app()
+app()
