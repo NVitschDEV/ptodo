@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# Colors because why not
+GREEN="\033[1;32m"
+RED="\033[1;31m"
+RESET="\033[0m"
+
+# Somebody used nonexistent stuff... so here it is made existent.
+print_msg() {
+    echo -e "${GREEN}[INSTALL]${RESET} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${RESET} $1"
+}
+
+
+
 BASH_RC="$HOME/.bashrc"
 CONFIG_LINE="alias todo='python3 $HOME/TODOAPP/TODOLIST.py'"
 
