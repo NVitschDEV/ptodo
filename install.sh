@@ -3,7 +3,7 @@
 BASH_RC="$HOME/.bashrc"
 CONFIG_LINE="alias todo='python3 $HOME/TODOAPP/TODOLIST.py'"
 
-# 3. Edit .bashrc safely
+# Edit .bashrc safely
 if [ -f "$BASH_RC" ]; then
     # Check if the line already exists (Idempotency check)
     if grep -Fxq "$CONFIG_LINE" "$BASH_RC"; then
