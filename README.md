@@ -23,9 +23,9 @@ Then simply run the install script:
 ~/TODOAPP/install.sh
 ```
 You will be able to use the app with this command.
-'''bash
+```bash
 todo
-'''
+```
 
 
 Please dont try the uninstall script it is in the betaphase. :)
