@@ -16,7 +16,11 @@ console = Console()
 def load_todos():
     if os.path.exists(FILENAME):
         with open(FILENAME, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+            # Migration: if the file has old strings, convert them to dictionaries
+            if data and isinstance(data[0], str):
+                return [{"task": t, "done": False} for t in data]
+            return data
     return []
 
 
@@ -34,8 +38,17 @@ def get_task_table(todos):
     if not todos:
         return Panel("No tasks found! Get to work!", style="red")
 
-    for idx, task in enumerate(todos, 1):
-        table.add_row(str(idx), task, "[green]Pending[/green]")
+    for idx, item in enumerate(todos, 1):
+        # Check if done to change display
+        task_text = item["task"]
+        if item["done"]:
+            status = "[bold green]✔ Done[/bold green]"
+            display_task = f"[strike dim]{task_text}[/strike dim]"
+        else:
+            status = "[yellow]Pending[/yellow]"
+            display_task = task_text
+
+        table.add_row(str(idx), display_task, status)
 
     return table
 
@@ -57,32 +70,46 @@ def add_mode(todos):
     while True:
         print_header()
         console.print(get_task_table(todos))
-
         task = Prompt.ask("\n[bold green]Add Task[/bold green] (or 'exit')")
-
         if task.lower() == "exit":
             break
-
-        todos.append(task)
+        # Save as a dictionary now
+        todos.append({"task": task, "done": False})
         save_todos(todos)
         console.print(f"[green]Added:[/green] {task}")
         time.sleep(0.5)
+
+
+def complete_mode(todos):
+    while True:
+        print_header()
+        console.print(get_task_table(todos))
+        task_num = Prompt.ask("\n[bold green]Complete Number[/bold green] (or 'exit')")
+        if task_num.lower() == "exit":
+            break
+        if task_num.isdigit():
+            idx = int(task_num) - 1
+            if 0 <= idx < len(todos):
+                todos[idx]["done"] = True
+                save_todos(todos)
+                console.print(f"[green]Task marked as done![/green]")
+                time.sleep(1)
+            else:
+                console.print("[red]Invalid number![/red]")
+                time.sleep(1)
 
 
 def remove_mode(todos):
     while True:
         print_header()
         console.print(get_task_table(todos))
-
         task_num = Prompt.ask("\n[bold red]Delete Number[/bold red] (or 'exit')")
-
         if task_num.lower() == "exit":
             break
-
         if task_num.isdigit():
             idx = int(task_num) - 1
             if 0 <= idx < len(todos):
-                removed = todos.pop(idx)
+                removed = todos.pop(idx)["task"]  # Access the 'task' key for the print
                 save_todos(todos)
                 console.print(f"[red]Removed:[/red] {removed}")
                 time.sleep(1)
@@ -93,7 +120,6 @@ def remove_mode(todos):
 
 def app():
     todos = load_todos()
-
     while True:
         print_header()
         console.print(
@@ -103,18 +129,22 @@ def app():
         )
 
         console.print("\n[1] [bold green]Add Task[/bold green]")
-        console.print("[2] [bold red]Remove Task[/bold red]")
-        console.print("[3] [bold white]Exit[/bold white]")
+        console.print("[2] [bold blue1]Complete Task[/bold blue1]")
+        console.print("[3] [bold red]Remove Task[/bold red]")
+        console.print("[4] [bold white]Exit[/bold white]")
 
-        choice = Prompt.ask("\nChoose", choices=["1", "2", "3"])
+        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4"])
 
         if choice == "1":
             add_mode(todos)
         elif choice == "2":
-            remove_mode(todos)
+            complete_mode(todos)
         elif choice == "3":
+            remove_mode(todos)
+        elif choice == "4":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
 
 
-app()
+if __name__ == "__main__":
+    app()
