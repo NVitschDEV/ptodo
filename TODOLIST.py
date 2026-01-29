@@ -34,7 +34,6 @@ else:
 
 
 def show_todo(items):
-    print("\n3\n")
     print("╔" + "═" * (BOX_WIDTH + 2) + "╗")
     for item in items:
         print(f"║ {item:^{BOX_WIDTH}} ║")
@@ -42,14 +41,15 @@ def show_todo(items):
 
 
 def add_task():
-    hans = 1
     print("Add your Task here, write exit to exit!")
-    while hans == 1:
+    show_todo(todos)
+    while 1 == 1:
         task = input("")
         if task == "exit":
             break
         else:
             todos.append(task)
+            show_todo(todos)
 
 
 def remove_task():
@@ -58,6 +58,7 @@ def remove_task():
         task_remove = input("")
         if task_remove in todos:
             todos.remove(task_remove)
+            show_todo(todos)
         elif task_remove == "exit":
             break
         else:
