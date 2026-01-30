@@ -80,7 +80,7 @@ def add_mode(todos):
         time.sleep(0.5)
 
 
-def complete_mode(todos):
+def complete_mode(todos):https://kaido.to/watch/a-returners-magic-should-be-special-18600?ep=109418
     while True:
         print_header()
         console.print(get_task_table(todos))
@@ -109,7 +109,7 @@ def remove_mode(todos):
         if task_num.isdigit():
             idx = int(task_num) - 1
             if 0 <= idx < len(todos):
-                removed = todos.pop(idx)["task"]  # Access the 'task' key for the print
+                removed = todos.pop(idx)["task"]
                 save_todos(todos)
                 console.print(f"[red]Removed:[/red] {removed}")
                 time.sleep(1)
