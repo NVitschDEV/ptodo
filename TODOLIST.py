@@ -80,7 +80,7 @@ def add_mode(todos):
         time.sleep(0.5)
 
 
-def complete_mode(todos):https://kaido.to/watch/a-returners-magic-should-be-special-18600?ep=109418
+def complete_mode(todos):
     while True:
         print_header()
         console.print(get_task_table(todos))
