@@ -152,9 +152,10 @@ def app():
         console.print("[2] [bold blue1]Complete Task[/bold blue1]")
         console.print("[3] [bold orange]Remove Task[/bold orange]")
         console.print("[4] [bold red]Remove all[/bold red]")
-        console.print("[5] [bold white]Exit[/bold white]")
+        console.print("[5] [bold white]Reload[/bold white]")
+        console.print("[6] [bold white]Exit[/bold white]")
 
-        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4", "5", "exit"])
+        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4", "5", "6", "exit"])
 
         if choice == "1":
             add_mode(todos)
@@ -165,6 +166,9 @@ def app():
         elif choice == "4":
             removeAll_mode(todos)
         elif choice == "5":
+            console.print("[bold yellow]Reload[/bold yellow]")
+            todos = load_todos()
+        elif choice == "6":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
         elif choice == "exit":
