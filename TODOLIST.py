@@ -133,6 +133,9 @@ def removeAll_mode(todos):
             console.print("[red]Invalid number![/red]")
             time.sleep(1)
 
+def colorscemes():
+
+
 
 def app():
     while True:
