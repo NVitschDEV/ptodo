@@ -4,6 +4,19 @@ This is a todolist app.
 If you run the install script you will be able to run it in the terminal with the command 'todo'.
 (The install script works only in bash terminals)
 
+# DEPENDENCIES
+
+You need rich for python.
+
+´´´bash
+python3 -m pip install rich
+´´´
+
+If pip is missing: 
+´´´bash
+sudo apt install python3-pip
+´´´
+
 # INSTALL
 
 You first need to clone the repo into ~/TODOAPP:
