@@ -117,7 +117,7 @@ def remove_mode(todos):
                 console.print("[red]Invalid number![/red]")
                 time.sleep(1)
 
-def removeAll_mode()
+def removeAll_mode():
     while True:
         print_header()
         console.print(get_task_table(todos))
