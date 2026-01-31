@@ -144,6 +144,12 @@ def app():
         elif choice == "4":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
-
+        elif choice == "exit":
+            console.print("[bold yellow]Goodbye![/bold yellow]")
+            break
+        elif choice == "Exit":
+            console.print("[bold yellow]Goodbye![/bold yellow]")
+            break  
+            
 
 app()
