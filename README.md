@@ -57,7 +57,7 @@ paru -S ptodo
 
 You can clone it manually
 ```bash
-git clone
+git clone https://github.com/NVitschDEV/ptodo.git
 cd ptodo/
 makepkg -si
 ```
