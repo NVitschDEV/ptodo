@@ -118,14 +118,10 @@ def remove_mode(todos):
                 time.sleep(1)
 
 
-def removeAll_mode():
+def removeAll_mode(todos):
     while True:
         print_header()
-        console.print(
-            Panel(
-                get_task_table(todos), title="Current To-Do List", border_style="blue"
-            )
-        )
+        console.print(get_task_table(todos))
         task_1 = Prompt.ask(
             "\n[bold red]ARE YOU SURE YOU WANT TO REMO0VE ALL TASKS?! Type 'YES' [/bold red] (or 'exit')"
         )
