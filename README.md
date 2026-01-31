@@ -48,6 +48,16 @@ You will be able to use the app with this command.
 ```bash
 todo
 ```
-
-
 Please dont try the uninstall script. It is in the betaphase. :)
+
+You can use an AUR helper
+```bash
+paru -S ptodo
+```
+
+You can clone it manually
+```bash
+git clone
+cd ptodo/
+makepkg -si
+```
