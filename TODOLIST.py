@@ -147,7 +147,7 @@ def app():
 
         console.print("\n[1] [bold green]Add Task[/bold green]")
         console.print("[2] [bold blue1]Complete Task[/bold blue1]")
-        console.print("[3] [bold orange]Remove Task[/bold red]")
+        console.print("[3] [bold orange]Remove Task[/bold orange]")
         console.print("[4] [bold red]Remove all[/bold white]")
         console.print("[5] [bold white]Exit[/bold white]")
 
