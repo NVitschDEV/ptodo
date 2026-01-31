@@ -54,7 +54,7 @@ def get_task_table(todos):
 
 def print_header():
     os.system("cls" if os.name == "nt" else "clear")
-    logo = """
+    logo = r"""
     [bold red]___________________  ________    ________  .____    .___  ____________________[/bold red]
     [bold red]\__    ___/\_____  \ \______ \   \_____  \ |    |   |   |/     _____/\__    ___/[/bold red]
     [bold blue1]  |    |    /   |   \ |    |  \   /   |   \|    |   |   |\_____  \     |    |[/bold blue1]
@@ -136,8 +136,8 @@ def removeAll_mode(todos):
 def colorscemes():
 
 
-
 def app():
+    print('test')
     while True:
         todos = load_todos()
         print_header()
