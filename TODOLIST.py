@@ -17,7 +17,6 @@ def load_todos():
     if os.path.exists(FILENAME):
         with open(FILENAME, "r") as f:
             data = json.load(f)
-            # Migration: if the file has old strings, convert them to dictionaries
             if data and isinstance(data[0], str):
                 return [{"task": t, "done": False} for t in data]
             return data
@@ -129,15 +128,15 @@ def removeAll_mode(todos):
             break
         elif task_1 == "YES":
             os.remove(FILENAME)
-
+            break
         else:
             console.print("[red]Invalid number![/red]")
             time.sleep(1)
 
 
 def app():
-    todos = load_todos()
     while True:
+        todos = load_todos()
         print_header()
         console.print(
             Panel(
@@ -165,6 +164,9 @@ def app():
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
         elif choice == "exit":
+            console.print("[bold yellow]Goodbye![/bold yellow]")
+            break
+        elif choice == "Exit":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
 
