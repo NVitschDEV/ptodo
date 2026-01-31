@@ -5,9 +5,10 @@ If you run the install script you will be able to run it in the terminal with th
 (The install script works only in bash terminals)
 We are happy about any feedback! Do not hesitate.
 
+---
+
 Make sure you have installed the dependencies.
 
----
 # DEPENDENCIES
 
 You need rich for python.
