@@ -8,14 +8,14 @@ If you run the install script you will be able to run it in the terminal with th
 
 You need rich for python.
 
-´´´bash
+```bash
 python3 -m pip install rich
-´´´
+```
 
 If pip is missing: 
-´´´bash
+```bash
 sudo apt install python3-pip
-´´´
+```
 
 # INSTALL
 
