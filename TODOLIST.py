@@ -126,12 +126,12 @@ def removeAll_mode():
                 get_task_table(todos), title="Current To-Do List", border_style="blue"
             )
         )
-        task_num = Prompt.ask(
+        task_1 = Prompt.ask(
             "\n[bold red]ARE YOU SURE YOU WANT TO REMO0VE ALL TASKS?! Type 'YES' [/bold red] (or 'exit')"
         )
-        if task_num.lower() == "exit":
+        if task_1.lower() == "exit":
             break
-        elif task_num == "YES":
+        elif task_1 == "YES":
             os.remove(FILENAME)
 
         else:
