@@ -21,6 +21,10 @@ If pip is missing:
 ```bash
 sudo apt install python3-pip
 ```
+or:
+```bash
+sudo pacman -S python-pip
+```
 
 # INSTALL
 
