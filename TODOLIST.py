@@ -133,11 +133,12 @@ def removeAll_mode(todos):
             console.print("[red]Invalid number![/red]")
             time.sleep(1)
 
+
 def colorscemes():
+    pass
 
 
 def app():
-    print('test')
     while True:
         todos = load_todos()
         print_header()
