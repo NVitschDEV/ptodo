@@ -117,6 +117,20 @@ def remove_mode(todos):
                 console.print("[red]Invalid number![/red]")
                 time.sleep(1)
 
+def removeAll_mode
+    while True:
+        print_header()
+        console.print(get_task_table(todos))
+        task_num = Prompt.ask("\n[bold red]ARE YOU SURE YOU WANT TO REMO0VE ALL TASKS?! Type 'YES' [/bold red] (or 'exit')")
+        if task_num.lower() == "exit":
+            break
+        elif task_num = "YES":
+            os.remove(FILENAME)
+
+        else:
+            console.print("[red]Invalid number![/red]")
+            time.sleep(1)
+            
 
 def app():
     todos = load_todos()
@@ -130,10 +144,11 @@ def app():
 
         console.print("\n[1] [bold green]Add Task[/bold green]")
         console.print("[2] [bold blue1]Complete Task[/bold blue1]")
-        console.print("[3] [bold red]Remove Task[/bold red]")
-        console.print("[4] [bold white]Exit[/bold white]")
+        console.print("[3] [bold orange]Remove Task[/bold red]")
+        console.print("[4] [bold red]Remove all[/bold white]")
+        console.print("[5] [bold white]Exit[/bold white]")
 
-        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4", "exit"])
+        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4", "5", "exit"])
 
         if choice == "1":
             add_mode(todos)
@@ -142,6 +157,8 @@ def app():
         elif choice == "3":
             remove_mode(todos)
         elif choice == "4":
+            removeAll_mode(todos)
+        elif choice == "5":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
         elif choice == "exit":
