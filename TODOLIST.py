@@ -117,7 +117,7 @@ def remove_mode(todos):
                 console.print("[red]Invalid number![/red]")
                 time.sleep(1)
 
-def removeAll_mode
+def removeAll_mode()
     while True:
         print_header()
         console.print(get_task_table(todos))
@@ -130,7 +130,7 @@ def removeAll_mode
         else:
             console.print("[red]Invalid number![/red]")
             time.sleep(1)
-            
+
 
 def app():
     todos = load_todos()
@@ -165,6 +165,6 @@ def app():
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
 
-            
+
 
 app()
