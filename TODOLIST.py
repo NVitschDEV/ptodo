@@ -133,7 +133,7 @@ def app():
         console.print("[3] [bold red]Remove Task[/bold red]")
         console.print("[4] [bold white]Exit[/bold white]")
 
-        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4"])
+        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4", "Exit", "exit"])
 
         if choice == "1":
             add_mode(todos)
