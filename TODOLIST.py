@@ -72,11 +72,13 @@ def add_mode(todos):
         task = Prompt.ask("\n[bold green]Add Task[/bold green] (or 'exit')")
         if task.lower() == "exit":
             break
-        # Save as a dictionary now
-        todos.append({"task": task, "done": False})
-        save_todos(todos)
-        console.print(f"[green]Added:[/green] {task}")
-        time.sleep(0.5)
+        if task == "":
+            console.print("Please enter something")
+            time.sleep(1)
+        else:
+            todos.append({"task": task, "done": False})
+            save_todos(todos)
+            console.print(f"[green]Added:[/green] {task}")
 
 
 def complete_mode(todos):
@@ -91,11 +93,9 @@ def complete_mode(todos):
             if 0 <= idx < len(todos):
                 todos[idx]["done"] = True
                 save_todos(todos)
-                console.print(f"[green]Task marked as done![/green]")
-                time.sleep(1)
+                console.print("[green]Task marked as done![/green]")
             else:
                 console.print("[red]Invalid number![/red]")
-                time.sleep(1)
 
 
 def remove_mode(todos):
@@ -111,10 +111,8 @@ def remove_mode(todos):
                 removed = todos.pop(idx)["task"]
                 save_todos(todos)
                 console.print(f"[red]Removed:[/red] {removed}")
-                time.sleep(1)
             else:
                 console.print("[red]Invalid number![/red]")
-                time.sleep(1)
 
 
 def removeAll_mode(todos):
@@ -131,7 +129,6 @@ def removeAll_mode(todos):
             break
         else:
             console.print("[red]Invalid number![/red]")
-            time.sleep(1)
 
 
 def colorscemes():
@@ -172,9 +169,6 @@ def app():
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
         elif choice == "exit":
-            console.print("[bold yellow]Goodbye![/bold yellow]")
-            break
-        elif choice == "Exit":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
 
