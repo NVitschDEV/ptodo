@@ -41,4 +41,4 @@ todo
 ```
 
 
-Please dont try the uninstall script it is in the betaphase. :)
+Please dont try the uninstall script. It is in the betaphase. :)
