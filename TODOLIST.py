@@ -117,14 +117,17 @@ def remove_mode(todos):
                 console.print("[red]Invalid number![/red]")
                 time.sleep(1)
 
+
 def removeAll_mode():
     while True:
         print_header()
         console.print(get_task_table(todos))
-        task_num = Prompt.ask("\n[bold red]ARE YOU SURE YOU WANT TO REMO0VE ALL TASKS?! Type 'YES' [/bold red] (or 'exit')")
+        task_num = Prompt.ask(
+            "\n[bold red]ARE YOU SURE YOU WANT TO REMO0VE ALL TASKS?! Type 'YES' [/bold red] (or 'exit')"
+        )
         if task_num.lower() == "exit":
             break
-        elif task_num = "YES":
+        elif task_num == "YES":
             os.remove(FILENAME)
 
         else:
@@ -164,7 +167,6 @@ def app():
         elif choice == "exit":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
-
 
 
 app()
