@@ -160,7 +160,7 @@ def app():
         elif choice == "3":
             remove_mode(todos)
         elif choice == "4":
-            removeAll_mode()
+            removeAll_mode(todos)
         elif choice == "5":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
