@@ -71,8 +71,8 @@ def colorscemes():
     console.print("[2] [bold blue1]Tokyo Night[/bold blue1]")
     console.print("[3] [bold orange]Dracula[/bold orange]")
     console.print("[4] [bold red]Gruvbox[/bold red]")
-    console.print("[4] [bold blue]Nord[/bold blue]")
-    choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4"])
+    console.print("[5] [bold blue]Nord[/bold blue]")
+    choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4", "5"])
     if choice == "1":
         logo = inspect.cleandoc(r"""
         [bold #cba6f7]___________________  ________    ________  .____    .___  ____________________[/bold #cba6f7]
@@ -217,9 +217,7 @@ def app():
         console.print("[6] [bold white]Exit[/bold white]")
         console.print("[7] [bold purple]Settings[/bold purple]")
 
-        choice = Prompt.ask(
-            "\nChoose", choices=["1", "2", "3", "4", "5", "6", "exit", "7"]
-        )
+        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4", "5", "exit", "7"])
 
         if choice == "1":
             add_mode(todos)
@@ -230,15 +228,12 @@ def app():
         elif choice == "4":
             removeAll_mode(todos)
         elif choice == "5":
-            console.print("[bold yellow]Reload[/bold yellow]")
-            todos = load_todos()
-        elif choice == "6":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
         elif choice == "exit":
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
-        elif choice == "7":
+        elif choice == "6":
             colorscemes()
 
 
