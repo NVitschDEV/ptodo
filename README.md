@@ -9,8 +9,6 @@ We are happy about any feedback! Do not hesitate.
 
 # INSTALL
 
-Please dont try the uninstall script. It is in the betaphase. :)
-
 You can use an AUR helper:
 ```bash
 paru -S ptodo
