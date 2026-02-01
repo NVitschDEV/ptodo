@@ -67,10 +67,11 @@ logo = r"""
 def colorscemes():
     global logo
     print_header()
-    console.print("\n[1] [bold green]Catppuchin (Mocha)[/bold green]")
+    console.print("\n[1] [bold pink]Catppuchin (Mocha)[/bold pink]")
     console.print("[2] [bold blue1]Tokyo Night[/bold blue1]")
     console.print("[3] [bold orange]Dracula[/bold orange]")
     console.print("[4] [bold red]Gruvbox[/bold red]")
+    console.print("[4] [bold blue]Nord[/bold blue]")
     choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4"])
     if choice == "1":
         logo = inspect.cleandoc(r"""
