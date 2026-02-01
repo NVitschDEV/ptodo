@@ -3,6 +3,7 @@
 import inspect
 import json
 import os
+import pickle
 import time
 
 from rich.align import Align
@@ -12,6 +13,7 @@ from rich.prompt import Prompt
 from rich.table import Table
 
 FILENAME = "TODOLIST.json"
+PICKLE_FILE = "my_data.pkl"
 console = Console()
 
 
@@ -213,11 +215,10 @@ def app():
         console.print("[2] [bold blue1]Complete Task[/bold blue1]")
         console.print("[3] [bold orange]Remove Task[/bold orange]")
         console.print("[4] [bold red]Remove all[/bold red]")
-        console.print("[5] [bold white]Reload[/bold white]")
-        console.print("[6] [bold white]Exit[/bold white]")
-        console.print("[7] [bold purple]Settings[/bold purple]")
+        console.print("[5] [bold white]Exit[/bold white]")
+        console.print("[6] [bold purple]Settings[/bold purple]")
 
-        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4", "5", "exit", "7"])
+        choice = Prompt.ask("\nChoose", choices=["1", "2", "3", "4", "5", "exit", "6"])
 
         if choice == "1":
             add_mode(todos)
@@ -237,4 +238,21 @@ def app():
             colorscemes()
 
 
+def load_logo():
+    global logo
+    if os.path.exists(PICKLE_FILE):
+        try:
+            with open(PICKLE_FILE, "rb") as f:
+                logo = pickle.load(f)
+        except Exception:
+            pass
+
+
+def save_logo():
+    with open(PICKLE_FILE, "wb") as f:
+        pickle.dump(logo, f)
+
+
+load_logo()
 app()
+save_logo()
