@@ -2,7 +2,7 @@
  
 This is a todolist app.
 If you run the install script you will be able to run it in the terminal with the command 'ptodo'.
-(The install script works only in bash terminals)
+
 We are happy about any feedback! Do not hesitate.
 
 ---
