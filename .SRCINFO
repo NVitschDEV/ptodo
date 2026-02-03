@@ -6,6 +6,6 @@ pkgbase = ptodo
 	depends = python
 	depends = python-rich
 	source = ptodo.py
-	sha256sums = 8b46988ddf1a9cbd4ed3579231be0dd4cdd353839ea0cc36bf450377dce34495
+	sha256sums = 19b0d4ef3b7de0d041efa5d06649999a1e60666a9b0fddcc979f977761f6deed
 
 pkgname = ptodo
