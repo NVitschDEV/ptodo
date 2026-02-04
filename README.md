@@ -20,3 +20,5 @@ git clone https://github.com/NVitschDEV/ptodo.git
 cd ptodo/
 makepkg -si
 ```
+# SHOUTOUTS
+Thanks smarthumankinda (https://github.com/smarthumankinda) for making the NixOS flake
