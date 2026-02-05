@@ -16,7 +16,7 @@ paru -S ptodo
 
 Or you can install it manually:
 ```bash
-git clone https://github.com/NVitschDEV/ptodo.git
+git clone https://aur.archlinux.org/packages/ptodo
 cd ptodo/
 makepkg -si
 ```
