@@ -29,16 +29,11 @@ def load_todos():
     if os.path.exists(FILENAME):
         with open(FILENAME, "r") as f:
             data = json.load(f)
-            # Migration/Cleaning: Ensure all items have the "priority" key
             for item in data:
                 if isinstance(item, dict) and "priority" not in item:
                     item["priority"] = "4"
-
-            # Legacy support for old string-only lists
             if data and isinstance(data[0], str):
                 return [{"task": t, "done": False, "priority": "4"} for t in data]
-
-            # Sort by priority (1 is highest) then by completion status
             data.sort(key=lambda x: (x.get("done", False), x.get("priority", "4")))
             return data
     return []
