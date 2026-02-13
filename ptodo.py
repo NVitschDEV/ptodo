@@ -259,7 +259,7 @@ def app():
                 get_task_table(todos), title="Current To-Do List", border_style="blue"
             )
         )
-
+        console.print("")
         choice = questionary.select(
             "Choose an option:",
             choices=[
