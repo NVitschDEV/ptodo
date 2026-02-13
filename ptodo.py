@@ -259,20 +259,27 @@ def app():
                 get_task_table(todos), title="Current To-Do List", border_style="blue"
             )
         )
-        console.print("")
-        choice = questionary.select(
-            "Choose an option:",
-            choices=[
-                questionary.Choice(" Add Task", value="1"),
-                questionary.Choice("󱉤 Complete Task", value="2"),
-                questionary.Choice("󰛲 Remove Task", value="3"),
-                questionary.Choice(" Edit Task", value="4"),
-                questionary.Choice("󰗨 Remove All", value="5"),
-                questionary.Choice(" Settings", value="6"),
-                questionary.Choice("󰞘 Exit", value="7"),
-            ],
-            style=questionary.Style([("pointer", "fg:cyan bold")]),
-        ).ask()
+
+        console.print(
+            Align.center(
+                "\n     [1] [bold green]Add Task[/bold green]     [2] [bold blue]Complete Task[/bold blue]"
+            )
+        )
+        console.print(
+            Align.center(
+                " [3] [bold red]Remove Task[/bold red]  [4] [bold yellow]Edit Task[/bold yellow]"
+            )
+        )
+        console.print(
+            Align.center(
+                "[5] [bold white]Remove All[/bold white]   [6] [bold magenta]Settings[/bold magenta]"
+            )
+        )
+        console.print(Align.center(" [7] [bold dim]Exit[/bold dim]"))
+
+        choice = Prompt.ask(
+            "\nChoose", choices=["1", "2", "3", "4", "5", "6", "7", "exit"]
+        )
 
         if choice == "1":
             add_mode(todos)
@@ -286,7 +293,7 @@ def app():
             removeAll_mode(todos)
         elif choice == "6":
             colorscemes()
-        elif choice in ["7", None]:
+        elif choice in ["7", "exit"]:
             console.print("[bold yellow]Goodbye![/bold yellow]")
             break
 
