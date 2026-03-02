@@ -6,6 +6,7 @@ If you run the install script you will be able to run it in the terminal with th
 We are happy about any feedback! Please do not hesitate.
 
 ---
+<img width="1852" height="567" alt="image" src="https://github.com/user-attachments/assets/338afd83-675c-4b96-a5bb-71b0f74595b8" />
 
 # INSTALL
 
