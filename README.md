@@ -11,11 +11,15 @@ We are happy about any feedback! Please do not hesitate.
 
 You can use an AUR helper:
 ```bash
+paru -S python-questionary
 paru -S ptodo
 ```
 
 Or you can install it manually:
 ```bash
+git clone https://aur.archlinux.org/python-questionary.git
+cd python-questionary/
+makepkg -si
 git clone https://aur.archlinux.org/ptodo.git
 cd ptodo/
 makepkg -si
