@@ -17,7 +17,6 @@ FILENAME = "TODOLIST.json"
 PICKLE_FILE = "my_data.pkl"
 console = Console()
 
-# Priority Mapping for display and sorting
 PRIORITIES = {
     "1": {"label": "[bold red]High[/bold red]", "sort": 1},
     "2": {"label": "[bold yellow]Medium[/bold yellow]", "sort": 2},
