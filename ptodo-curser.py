@@ -84,7 +84,7 @@ def draw_table(stdscr, todos, start_y):
 
     y = start_y + 2
     for idx, item in enumerate(todos, 1):
-        if y >= h - 8:  # Prevent overflowing into menu
+        if y >= h - 8:
             break
 
         task_text = (
