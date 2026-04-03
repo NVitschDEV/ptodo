@@ -15,7 +15,6 @@
       format = "i love pingp on the pp";
 
       propagatedBuildInputs = with pkgs.python3Packages; [
-        rich
       ];
 
       installPhase = ''
