@@ -5,9 +5,8 @@ import json
 import os
 import pickle
 
-TODOLIST = "TODOLIST.json"
+FILENAME = "TODOLIST.json"
 PICKLE_FILE = "theme_data_curses.pkl"
-GROCERIES_FILE = "GROCERIES.json"
 
 LOGO = [
     r"___________________  ________    ________  .____    .___  _______________________",
@@ -16,17 +15,12 @@ LOGO = [
     r"  |    |   /    |    \|    `   \ /    |    \    |___|   |/        \     |    |   ",
     r"  |____|   \_________/_________/ \_________/________\___/_________/     |____|   ",
 ]
-GROCERIES_LOGO = [
-    r"         "
-    r"GROCERIES"
-    r"         "
-]
 
 
 def load_todos():
-    if os.path.exists(TODOLIST):
+    if os.path.exists(FILENAME):
         try:
-            with open(TODOLIST, "r") as f:
+            with open(FILENAME, "r") as f:
                 data = json.load(f)
                 for item in data:
                     if isinstance(item, dict) and "priority" not in item:
@@ -41,7 +35,7 @@ def load_todos():
 
 
 def save_todos(todos):
-    with open(TODOLIST, "w") as f:
+    with open(FILENAME, "w") as f:
         json.dump(todos, f, indent=4)
 
 
@@ -288,18 +282,18 @@ def removeAll_mode(stdscr, todos, theme_id):
         stdscr, "ARE YOU SURE? Type 'YES' to delete everything: ", h - 3, 2
     )
     if confirm == "YES":
-        if os.path.exists(TODOLIST):
-            os.remove(TODOLIST)
+        if os.path.exists(FILENAME):
+            os.remove(FILENAME)
         todos.clear()
 
 
 def draw_main_menu(stdscr):
     h, w = stdscr.getmaxyx()
     menu_lines = [
-        " [1] Add Task     [2] Complete Task",
-        " [3] Remove Task  [4] Edit Task    ",
-        " [5] Remove All   [6] Settings     ",
-        " [7] Exit         [8] Groceries    ",
+        "     [1] Add Task     [2] Complete Task",
+        "  [3] Remove Task  [4] Edit Task",
+        "[5] Remove All   [6] Settings",
+        " [7] Exit",
     ]
     for i, line in enumerate(menu_lines):
         try:
@@ -313,7 +307,7 @@ def draw_main_menu(stdscr):
             pass
 
     try:
-        msg = "Choose (1-8): "
+        msg = "Choose (1-7): "
         stdscr.addstr(h - 1, max(0, (w - len(msg)) // 2), msg, curses.color_pair(2))
     except curses.error:
         pass
@@ -384,413 +378,7 @@ def main(stdscr):
                     pickle.dump(theme_id, f)
         elif key in [ord("7"), 27]:
             break
-        elif key == ord("8"):
-            curses.wrapper(sort_groceries_auto)
 
-
-"""""" """""" """"""
-
-
-def sort_groceries_auto(stdscr):
-    try:
-        curses.curs_set(0)
-    except curses.error:
-        pass
-
-    curses.start_color()
-    try:
-        curses.use_default_colors()
-        bg = -1
-    except curses.error:
-        bg = curses.COLOR_BLACK
-
-    # Standardize our colors
-    curses.init_pair(1, curses.COLOR_RED, bg)
-    curses.init_pair(2, curses.COLOR_YELLOW, bg)
-    curses.init_pair(3, curses.COLOR_BLUE, bg)
-    curses.init_pair(4, curses.COLOR_GREEN, bg)
-    curses.init_pair(5, curses.COLOR_CYAN, bg)
-    curses.init_pair(6, curses.COLOR_MAGENTA, bg)
-    curses.init_pair(7, curses.COLOR_WHITE, bg)
-
-    theme_id = "1"
-
-    # fix it with json GROCERIES_FILE save the keywords
-    # if os.path.exists(GROCERIES_FILE):
-    #    try:
-    #        with open(GROCERIES_FILE, "r") as f:
-    #            category_keywords = json.load(f)
-    #   except Exception:
-    #       pass
-
-    """
-    A Python program that helps you sort your groceries into categories,
-    with an automatic sorting feature based on keywords.
-    """
-
-    category_keywords = {
-        "Fruits": [
-            "apple",
-            "banana",
-            "orange",
-            "grape",
-            "strawberry",
-            "blueberry",
-            "raspberry",
-            "lemon",
-            "lime",
-            "peach",
-            "pear",
-            "mango",
-            "pineapple",
-            "kiwi",
-            "melon",
-            "cherry",
-            "avocado",
-            "plum",
-            "fig",
-            "apricot",
-            "cranberry",
-            "date",
-            "pomegranate",
-        ],
-        "Vegetables": [
-            "carrot",
-            "broccoli",
-            "spinach",
-            "lettuce",
-            "tomato",
-            "cucumber",
-            "onion",
-            "garlic",
-            "potato",
-            "sweet potato",
-            "bell pepper",
-            "zucchini",
-            "eggplant",
-            "cabbage",
-            "kale",
-            "celery",
-            "mushroom",
-            "corn",
-            "peas",
-            "green bean",
-            "asparagus",
-            "brussels sprout",
-            "cauliflower",
-            "squash",
-            "ginger",
-            "chili",
-            "jalapeno",
-            "artichoke",
-            "radish",
-            "beet",
-            "leek",
-            "bok choy",
-        ],
-        "Dairy & Eggs": [
-            "milk",
-            "cheese",
-            "yogurt",
-            "butter",
-            "egg",
-            "cream",
-            "sour cream",
-            "cottage cheese",
-            "cream cheese",
-            "ghee",
-            "kefir",
-            "creamer",
-            "margarine",
-            "feta",
-            "cheddar",
-            "mozzarella",
-            "Quark",
-        ],
-        "Meat & Seafood": [
-            "chicken",
-            "beef",
-            "sausage",
-            "ham",
-            "turkey",
-            "fish",
-            "salmon",
-            "tuna",
-            "shrimp",
-            "crab",
-            "scallop",
-            "lamb",
-            "steak",
-            "ground beef",
-            "hot dog",
-            "salami",
-            "pepperoni",
-            "cod",
-            "tilapia",
-            "oyster",
-            "clams",
-        ],
-        "Pantry Items": [
-            "pasta",
-            "rice",
-            "flour",
-            "sugar",
-            "salt",
-            "pepper",
-            "oil",
-            "vinegar",
-            "canned",
-            "soup",
-            "sauce",
-            "cereal",
-            "oats",
-            "tortilla",
-            "coffee",
-            "tea",
-            "jam",
-            "honey",
-            "spices",
-            "nuts",
-            "beans",
-            "lentils",
-            "broth",
-            "syrup",
-            "baking soda",
-            "baking powder",
-            "ketchup",
-            "mustard",
-            "mayonnaise",
-            "crackers",
-            "granola",
-            "dried fruit",
-            "peanut butter",
-            "almond butter",
-            "soy sauce",
-            "olive oil",
-            "vegetable oil",
-            "quinoa",
-            "couscous",
-            "brownie mix",
-            "cake mix",
-            "chocolate chips",
-            "gelatin",
-            "cornstarch",
-            "yeast",
-            "olives",
-            "pickles",
-            "chips",
-            "cookies",
-            "salsa",
-        ],
-        "Frozen Foods": [
-            "ice cream",
-            "frozen pizza",
-            "frozen vegetable",
-            "frozen fruit",
-            "frozen meal",
-            "waffle",
-            "fries",
-            "tater tot",
-            "burrito",
-            "nuggets",
-            "fish sticks",
-            "hash brown",
-            "popsicle",
-            "sorbet",
-            "ice",
-            "dough",
-            "smoothie mix",
-        ],
-        "Beverages": [
-            "juice",
-            "soda",
-            "water",
-            "beer",
-            "wine",
-            "cola",
-            "sparkling water",
-            "tea bag",
-            "coffee grounds",
-            "energy drink",
-            "sports drink",
-            "liquer",
-            "seltzer",
-            "kombucha",
-            "almond milk",
-            "soy milk",
-            "oat milk",
-        ],
-        "Snacks": [
-            "chips",
-            "cookie",
-            "cracker",
-            "bar",
-            "candy",
-            "chocolate",
-            "popcorn",
-            "pretzels",
-            "nuts",
-            "granola bar",
-            "fruit snack",
-            "gummy",
-            "jerky",
-            "trail mix",
-            "rice cakes",
-            "wafers",
-        ],
-        "Bakery": [
-            "bread",
-            "bagel",
-            "muffin",
-            "croissant",
-            "donut",
-            "pastry",
-            "pie",
-            "cupcake",
-            "sourdough",
-            "rolls",
-            "buns",
-            "tarts",
-            "bread",
-        ],
-        "Household & Personal Care": [
-            "soap",
-            "shampoo",
-            "conditioner",
-            "toothpaste",
-            "brush",
-            "detergent",
-            "cleaner",
-            "toilet paper",
-            "paper towel",
-            "sponge",
-            "lotion",
-            "razor",
-            "tissue",
-            "trash bag",
-            "dish soap",
-            "hand soap",
-            "deodorant",
-            "mouthwash",
-            "laundry",
-            "fabric softener",
-            "bleach",
-            "disinfectant",
-            "air freshener",
-            "light bulb",
-            "battery",
-            "aluminum foil",
-            "plastic wrap",
-            "ziploc",
-            "band-aid",
-            "medicine",
-            "vitamins",
-            "shaving cream",
-        ],
-    }
-
-    # This ensures all categories are present in the final output, even if empty
-    sorted_groceries = {category: [] for category in category_keywords}
-
-    print("=" * 40)
-    print(" Welcome to your Smart Grocery Sorter! ")
-    print("=" * 40)
-    print("Enter your grocery items one by one. Type 'done' when you're finished.")
-    print("The program will try to automatically sort items based on keywords.")
-    print("If it can't find a match, you'll be asked to choose a category manually.")
-    print("-" * 40)
-
-    # Display available categories for manual selection (if needed)
-    category_names_for_manual_selection = list(category_keywords.keys())
-    print("Available categories for manual sorting (if needed):")
-    for i, cat in enumerate(category_names_for_manual_selection):
-        print(f"  {i + 1}. {cat}")
-    print("-" * 40)
-
-    while True:
-        item_input = input("Enter grocery item (or 'done' to finish): ").strip()
-
-        if item_input.lower() == "done":
-            break
-        if not item_input:  # Handle empty input for item name
-            print("Please enter an item name.")
-            continue
-
-        item_normalized = item_input.lower()
-        assigned_automatically = False
-
-        # Attempt automatic sorting
-        # We iterate through categories, and for each category, check if any of its
-        # keywords are present in the entered item name.
-        for category, keywords in category_keywords.items():
-            # The 'if keyword' ensures we don't try to match against an empty string keyword
-            if any(keyword in item_normalized for keyword in keywords if keyword):
-                sorted_groceries[category].append(item_input)
-                print(f"'{item_input}' automatically added to '{category}'.")
-                assigned_automatically = True
-                break  # Item found and assigned, move to the next grocery input
-
-        # If no automatic match was found, ask the user to choose a category
-        if not assigned_automatically:
-            category_names_for_manual_selection = list(category_keywords.keys())
-            print("Available categories for manual sorting (if needed):")
-            for i, cat in enumerate(category_names_for_manual_selection):
-                print(f"  {i + 1}. {cat}")
-            print("-" * 40)
-            print(
-                f"Could not automatically sort '{item_input}'. Please choose a category:"
-            )
-
-            while True:
-                category_choice = input(
-                    f"Which category does '{item_input}' belong to? (Enter number or category name): "
-                ).strip()
-
-                chosen_category = None
-
-                # Try to match by number
-                if category_choice.isdigit():
-                    idx = int(category_choice) - 1
-                    if 0 <= idx < len(category_names_for_manual_selection):
-                        chosen_category = category_names_for_manual_selection[idx]
-                else:
-                    # Try to match by category name (case-insensitive)
-                    for cat_name in category_names_for_manual_selection:
-                        if category_choice.lower() == cat_name.lower():
-                            chosen_category = cat_name
-                            break
-
-                if chosen_category:
-                    sorted_groceries[chosen_category].append(item_input)
-                    print(f"'{item_input}' manually added to '{chosen_category}'.")
-                    break  # Exit inner loop, go to next item
-                else:
-                    print(
-                        "Invalid category choice. Please enter a valid number or category name from the list."
-                    )
-
-    print("" + "=" * 40)
-    print(" Your Sorted Groceries: ")
-    print("=" * 40)
-
-    # Display the sorted groceries
-    found_items = False
-    for category, items in sorted_groceries.items():
-        if items:  # Only print categories that have items
-            found_items = True
-            print(f"--- {category} ---")
-            for item in items:
-                print(f"- {item}")
-
-    if not found_items:
-        print("No items were entered or sorted.")
-
-    print("" + "=" * 40)
-    print(" Happy organizing! ")
-    print("=" * 40)
-
-
-"""""" """""" """"""
 
 if __name__ == "__main__":
     curses.wrapper(main)
