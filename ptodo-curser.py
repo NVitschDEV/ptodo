@@ -701,10 +701,10 @@ def grocery_sorter_mode(stdscr, theme_id):
 def draw_main_menu(stdscr):
     h, w = stdscr.getmaxyx()
     menu = [
-        "     [1] Add Task     [2] Complete Task",
-        "  [3] Remove Task  [4] Edit Task",
-        "[5] Remove All   [6] Settings",
-        " [7] Exit         [8] Grocery Sorter",
+        " [1] Add Task     [2] Complete Task  ",
+        " [3] Remove Task  [4] Edit Task      ",
+        " [5] Remove All   [6] Settings       ",
+        " [7] Exit         [8] Grocery Sorter ",
     ]
     for i, line in enumerate(menu):
         try:
