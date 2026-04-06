@@ -322,9 +322,10 @@ def load_grocery_list(categories):
         try:
             with open(GROCERY_LIST_FILE, "r") as f:
                 data = json.load(f)
-                for i in categories:
-                    if i not in data:
-                        data[i] = []
+                # Ensure all current categories exist in the loaded data
+                for cat in categories:
+                    if cat not in data:
+                        data[cat] = []
                 return data
         except Exception:
             pass
@@ -337,14 +338,8 @@ def save_grocery_list(l):
 
 
 def draw_logo(stdscr, theme_id):
-    themes = {
-        "1": (6, 3),  # Catppuccin
-        "2": (6, 5),  # Dracula
-        "3": (1, 2),  # Gruvbox
-        "4": (5, 3),  # Nord
-    }
+    themes = {"1": (6, 3), "2": (6, 5), "3": (1, 2), "4": (5, 3)}
     c1_idx, c2_idx = themes.get(theme_id, (6, 3))
-
     h, w = stdscr.getmaxyx()
     for i, line in enumerate(LOGO):
         x = max(0, (w - len(line)) // 2)
@@ -372,7 +367,6 @@ def draw_table(stdscr, todos, start_y):
 
     header = f"{'#':<4} | {'Priority':<10} | {'Task':<30} | {'Status':>15}"
     row_x = max(0, (w - len(header)) // 2)
-
     try:
         stdscr.addstr(start_y, row_x, header, curses.color_pair(6) | curses.A_BOLD)
         stdscr.addstr(start_y + 1, row_x, "-" * len(header), curses.color_pair(6))
@@ -383,12 +377,10 @@ def draw_table(stdscr, todos, start_y):
     for idx, item in enumerate(todos, 1):
         if y >= h - 8:
             break
-
         task_text = (
             item["task"][:27] + "..." if len(item["task"]) > 30 else item["task"]
         )
         prio_key = item.get("priority", "4")
-
         prio_map = {
             "1": ("High", curses.color_pair(1) | curses.A_BOLD),
             "2": ("Medium", curses.color_pair(2) | curses.A_BOLD),
@@ -398,15 +390,19 @@ def draw_table(stdscr, todos, start_y):
         p_lbl, p_color = prio_map.get(prio_key, prio_map["4"])
 
         if item.get("done"):
-            status_lbl = "✔ Done"
-            status_color = curses.color_pair(4) | curses.A_BOLD
-            p_lbl = "-"
-            p_color = curses.color_pair(7) | curses.A_DIM
-            task_attr = curses.color_pair(7) | curses.A_DIM
+            status_lbl, status_color, task_attr, p_lbl, p_color = (
+                "✔ Done",
+                curses.color_pair(4) | curses.A_BOLD,
+                curses.color_pair(7) | curses.A_DIM,
+                "-",
+                curses.color_pair(7) | curses.A_DIM,
+            )
         else:
-            status_lbl = "Pending"
-            status_color = curses.color_pair(2)
-            task_attr = curses.color_pair(5)
+            status_lbl, status_color, task_attr = (
+                "Pending",
+                curses.color_pair(2),
+                curses.color_pair(5),
+            )
 
         try:
             stdscr.addstr(y, row_x, f"{idx:<4} | ", curses.color_pair(7))
@@ -419,26 +415,63 @@ def draw_table(stdscr, todos, start_y):
     return y
 
 
+def draw_grocery_table(stdscr, grocery_list, start_y):
+    h, w = stdscr.getmaxyx()
+    flat_list = []
+    for cat, items in grocery_list.items():
+        for item in items:
+            flat_list.append((cat, item))
+
+    if not flat_list:
+        msg = "Your grocery list is empty!"
+        try:
+            stdscr.addstr(
+                start_y,
+                max(0, (w - len(msg)) // 2),
+                msg,
+                curses.color_pair(2) | curses.A_BOLD,
+            )
+        except curses.error:
+            pass
+        return start_y + 2
+
+    header = f"{'#':<4} | {'Category':<25} | {'Item':<30}"
+    row_x = max(0, (w - len(header)) // 2)
+    try:
+        stdscr.addstr(start_y, row_x, header, curses.color_pair(5) | curses.A_BOLD)
+        stdscr.addstr(start_y + 1, row_x, "-" * len(header), curses.color_pair(5))
+    except curses.error:
+        pass
+
+    y = start_y + 2
+    # Show only the last X items to keep input visible
+    visible_count = h - start_y - 10
+    display_items = (
+        flat_list[-visible_count:] if len(flat_list) > visible_count else flat_list
+    )
+
+    for idx, (cat, item) in enumerate(display_items, 1):
+        try:
+            stdscr.addstr(y, row_x, f"{idx:<4} | ", curses.color_pair(7))
+            stdscr.addstr(y, row_x + 7, f"{cat:<25}", curses.color_pair(6))
+            stdscr.addstr(y, row_x + 33, f"| {item:<30}", curses.color_pair(7))
+        except curses.error:
+            pass
+        y += 1
+    return y
+
+
 def prompt_input(stdscr, prompt_text, y, x):
-    stdscr.addstr(y, x, prompt_text, curses.color_pair(4) | curses.A_BOLD)
     try:
+        stdscr.addstr(y, x, prompt_text, curses.color_pair(4) | curses.A_BOLD)
         curses.curs_set(1)
-    except curses.error:
-        pass
-    curses.echo()
-
-    stdscr.refresh()
-    try:
+        curses.echo()
         s = stdscr.getstr(y, x + len(prompt_text)).decode("utf-8")
-    except Exception:
-        s = ""
-
-    curses.noecho()
-    try:
+        curses.noecho()
         curses.curs_set(0)
-    except curses.error:
-        pass
-    return s
+        return s
+    except Exception:
+        return ""
 
 
 def select_list(stdscr, title, items, theme_id):
@@ -447,7 +480,6 @@ def select_list(stdscr, title, items, theme_id):
         stdscr.clear()
         draw_logo(stdscr, theme_id)
         h, w = stdscr.getmaxyx()
-
         try:
             stdscr.addstr(
                 8,
@@ -464,28 +496,26 @@ def select_list(stdscr, title, items, theme_id):
 
         for i in range(start_idx, end_idx):
             lbl, val = items[i]
-            y = 10 + (i - start_idx)
-            x = max(0, (w - len(lbl)) // 2 - 2)
+            y, x = 10 + (i - start_idx), max(0, (w - len(lbl)) // 2 - 2)
             try:
-                if i == current:
-                    stdscr.addstr(
-                        y, x, f"> {lbl}", curses.color_pair(7) | curses.A_REVERSE
-                    )
-                else:
-                    stdscr.addstr(y, x, f"  {lbl}", curses.color_pair(7))
+                attr = (
+                    curses.color_pair(7) | curses.A_REVERSE
+                    if i == current
+                    else curses.color_pair(7)
+                )
+                stdscr.addstr(y, x, f"{'> ' if i == current else '  '}{lbl}", attr)
             except curses.error:
                 pass
 
         stdscr.refresh()
         key = stdscr.getch()
-
         if key == curses.KEY_UP and current > 0:
             current -= 1
         elif key == curses.KEY_DOWN and current < len(items) - 1:
             current += 1
-        elif key in [10, 13]:  # Enter key
+        elif key in [10, 13]:
             return items[current][1]
-        elif key == 27:  # Escape key
+        elif key == 27:
             return None
 
 
@@ -494,7 +524,6 @@ def add_mode(stdscr, todos, theme_id):
     draw_logo(stdscr, theme_id)
     draw_table(stdscr, todos, 8)
     h, w = stdscr.getmaxyx()
-
     task = prompt_input(stdscr, "Add Task (or 'exit'): ", h - 4, 2)
     if task and task.lower() != "exit":
         prio = prompt_input(
@@ -503,21 +532,20 @@ def add_mode(stdscr, todos, theme_id):
             h - 3,
             2,
         )
-        if prio not in ["1", "2", "3", "4"]:
-            prio = "4"
-        todos.append({"task": task, "done": False, "priority": prio})
+        todos.append(
+            {"task": task, "done": False, "priority": prio if prio in "1234" else "4"}
+        )
         save_todos(todos)
 
 
 def complete_mode(stdscr, todos, theme_id):
-    pending = [(i, t) for i, t in enumerate(todos) if not t["done"]]
+    pending = [
+        (f"Task {i + 1}: {t['task']}", i) for i, t in enumerate(todos) if not t["done"]
+    ]
     if not pending:
         return
-
-    options = [(f"Task {i + 1}: {t['task']}", i) for i, t in pending]
-    options.append(("EXIT", None))
-
-    selected = select_list(stdscr, "Select a task to complete:", options, theme_id)
+    pending.append(("EXIT", None))
+    selected = select_list(stdscr, "Select a task to complete:", pending, theme_id)
     if selected is not None:
         todos[selected]["done"] = True
         save_todos(todos)
@@ -528,41 +556,32 @@ def edit_mode(stdscr, todos, theme_id):
     draw_logo(stdscr, theme_id)
     draw_table(stdscr, todos, 8)
     h, w = stdscr.getmaxyx()
-
     task_num = prompt_input(stdscr, "Edit Number (or 'exit'): ", h - 4, 2)
     if task_num.isdigit():
         idx = int(task_num) - 1
         if 0 <= idx < len(todos):
             new_task = prompt_input(
-                stdscr,
-                f"New task name (Leave blank to keep '{todos[idx]['task']}'): ",
-                h - 3,
-                2,
+                stdscr, f"New name (Enter for '{todos[idx]['task']}'): ", h - 3, 2
             )
-            if not new_task:
-                new_task = todos[idx]["task"]
-
             new_prio = prompt_input(
                 stdscr,
-                f"Update Priority [1/2/3/4] (Current {todos[idx]['priority']}): ",
+                f"New Priority [1/2/3/4] (Current {todos[idx]['priority']}): ",
                 h - 2,
                 2,
             )
-            if new_prio not in ["1", "2", "3", "4"]:
-                new_prio = todos[idx]["priority"]
-
-            todos[idx]["task"] = new_task
-            todos[idx]["priority"] = new_prio
+            if new_task:
+                todos[idx]["task"] = new_task
+            if new_prio in "1234":
+                todos[idx]["priority"] = new_prio
             save_todos(todos)
 
 
 def remove_mode(stdscr, todos, theme_id):
     if not todos:
         return
-
-    options = [(f"Task {i + 1}: {t['task']}", i) for i, t in enumerate(todos)]
-    options.append(("EXIT", None))
-
+    options = [(f"Task {i + 1}: {t['task']}", i) for i, t in enumerate(todos)] + [
+        ("EXIT", None)
+    ]
     selected = select_list(stdscr, "Select a task to delete:", options, theme_id)
     if selected is not None:
         todos.pop(selected)
@@ -574,11 +593,10 @@ def removeAll_mode(stdscr, todos, theme_id):
     draw_logo(stdscr, theme_id)
     draw_table(stdscr, todos, 8)
     h, w = stdscr.getmaxyx()
-
-    confirm = prompt_input(
-        stdscr, "ARE YOU SURE? Type 'YES' to delete everything: ", h - 3, 2
-    )
-    if confirm == "YES":
+    if (
+        prompt_input(stdscr, "ARE YOU SURE? Type 'YES' to delete all: ", h - 3, 2)
+        == "YES"
+    ):
         if os.path.exists(FILENAME):
             os.remove(FILENAME)
         todos.clear()
@@ -594,152 +612,101 @@ def grocery_sorter_mode(stdscr, theme_id):
         draw_logo(stdscr, theme_id)
         h, w = stdscr.getmaxyx()
 
-        title = "Smart Grocery Sorter"
+        # Header for the mode
+        title = "--- SMART GROCERY SORTER ---"
         try:
             stdscr.addstr(
-                8,
+                7,
                 max(0, (w - len(title)) // 2),
                 title,
                 curses.color_pair(6) | curses.A_BOLD,
             )
             if last_action:
                 stdscr.addstr(
-                    10,
-                    max(0, (w - len(last_action)) // 2),
-                    last_action,
-                    curses.color_pair(2),
+                    h - 2, 2, f"Last Action: {last_action}", curses.color_pair(2)
                 )
         except curses.error:
             pass
 
-        prompt_str = "Enter item (or 'done', '!addword', '!clear'): "
-        item_input = prompt_input(
-            stdscr, prompt_str, 12, max(0, (w - len(prompt_str) - 20) // 2)
-        )
+        # Draw the table of current items
+        draw_grocery_table(stdscr, sorted_groceries, 9)
+
+        prompt_str = "Item (or 'done', '!addword', '!clear'): "
+        item_input = prompt_input(stdscr, prompt_str, h - 4, 2)
 
         if not item_input:
             continue
-
         if item_input.lower() == "done":
             break
-
         if item_input.lower() == "!clear":
-            sorted_groceries = {category: [] for category in category_keywords}
+            sorted_groceries = {cat: [] for cat in category_keywords}
             save_grocery_list(sorted_groceries)
-            last_action = "Grocery list cleared."
+            last_action = "List cleared."
             continue
 
         if item_input.lower() == "!addword":
-            new_word = prompt_input(
-                stdscr, "Enter new keyword to teach: ", 14, max(0, (w - 35) // 2)
-            )
+            new_word = prompt_input(stdscr, "Keyword to teach: ", h - 3, 2)
             if new_word:
-                options = [(cat, cat) for cat in category_keywords.keys()]
                 chosen_cat = select_list(
                     stdscr,
-                    f"Which category should '{new_word}' belong to?",
-                    options,
+                    f"Assign '{new_word}' to:",
+                    [(c, c) for c in category_keywords.keys()],
                     theme_id,
                 )
                 if chosen_cat:
-                    if new_word.lower() not in [
-                        kw.lower() for kw in category_keywords[chosen_cat]
-                    ]:
+                    if new_word.lower() not in category_keywords[chosen_cat]:
                         category_keywords[chosen_cat].append(new_word.lower())
                         save_grocery_dict(category_keywords)
-                        last_action = (
-                            f"Learned! '{new_word}' added to '{chosen_cat}' dictionary."
-                        )
-                    else:
-                        last_action = (
-                            f"'{new_word}' is already known in '{chosen_cat}'."
-                        )
-                else:
-                    last_action = "Dictionary addition cancelled."
-            else:
-                last_action = "No word entered."
+                        last_action = f"Taught '{new_word}' -> {chosen_cat}."
             continue
 
         item_normalized = item_input.lower()
         assigned = False
-
         for category, keywords in category_keywords.items():
-            if any(keyword in item_normalized for keyword in keywords if keyword):
+            if any(kw in item_normalized for kw in keywords if kw):
                 sorted_groceries[category].append(item_input)
                 save_grocery_list(sorted_groceries)
-                last_action = f"'{item_input}' auto-added to '{category}'."
+                last_action = f"Auto-added '{item_input}' to {category}."
                 assigned = True
                 break
 
         if not assigned:
-            options = [(cat, cat) for cat in category_keywords.keys()]
             chosen_cat = select_list(
-                stdscr, f"Where does '{item_input}' belong?", options, theme_id
+                stdscr,
+                f"Where does '{item_input}' belong?",
+                [(c, c) for c in category_keywords.keys()],
+                theme_id,
             )
             if chosen_cat:
                 sorted_groceries[chosen_cat].append(item_input)
                 save_grocery_list(sorted_groceries)
-
-                # Ask to remember this for the future
                 stdscr.clear()
                 draw_logo(stdscr, theme_id)
-                try:
-                    stdscr.addstr(
-                        8,
-                        max(0, (w - len(title)) // 2),
-                        title,
-                        curses.color_pair(6) | curses.A_BOLD,
-                    )
-                except curses.error:
-                    pass
-
-                ans_prompt = f"Remember '{item_normalized}' in '{chosen_cat}' for the future? (y/n): "
-                add_to_dict = prompt_input(
-                    stdscr, ans_prompt, 10, max(0, (w - len(ans_prompt) - 5) // 2)
-                )
-
-                if add_to_dict.lower() == "y":
-                    if item_normalized not in [
-                        kw.lower() for kw in category_keywords[chosen_cat]
-                    ]:
-                        category_keywords[chosen_cat].append(item_normalized)
-                        save_grocery_dict(category_keywords)
-                        last_action = f"'{item_input}' added to list AND taught to '{chosen_cat}' dictionary."
-                    else:
-                        last_action = f"'{item_input}' added to '{chosen_cat}' list."
+                if (
+                    prompt_input(
+                        stdscr,
+                        f"Remember '{item_normalized}' for {chosen_cat}? (y/n): ",
+                        10,
+                        2,
+                    ).lower()
+                    == "y"
+                ):
+                    category_keywords[chosen_cat].append(item_normalized)
+                    save_grocery_dict(category_keywords)
+                    last_action = f"Added '{item_input}' and updated dictionary."
                 else:
-                    last_action = (
-                        f"'{item_input}' manually added to '{chosen_cat}' list."
-                    )
-            else:
-                last_action = f"Skipped '{item_input}'."
-
-    # Build the display list for results
-    display_items = []
-    for cat, items in sorted_groceries.items():
-        if items:
-            display_items.append((f"--- {cat} ---", None))
-            for item in items:
-                display_items.append((f"  - {item}", None))
-            display_items.append(("", None))
-
-    if not display_items:
-        display_items.append(("No items currently in list.", None))
-
-    display_items.append(("Press Enter to return to main menu", "EXIT"))
-
-    select_list(stdscr, "Your Saved Groceries", display_items, theme_id)
+                    last_action = f"Added '{item_input}' once."
 
 
 def draw_main_menu(stdscr):
     h, w = stdscr.getmaxyx()
-    menu_lines = [
-        " [1] Add Task     [2] Complete Task  ",
-        " [3] Remove Task  [4] Edit Task      ",
-        " [5] Remove All   [6] Settings       ",
-        " [7] Exit         [8] Grocery Sorter ",
+    menu = [
+        "     [1] Add Task     [2] Complete Task",
+        "  [3] Remove Task  [4] Edit Task",
+        "[5] Remove All   [6] Settings",
+        " [7] Exit         [8] Grocery Sorter",
     ]
-    for i, line in enumerate(menu_lines):
+    for i, line in enumerate(menu):
         try:
             stdscr.addstr(
                 h - 6 + i,
@@ -749,54 +716,50 @@ def draw_main_menu(stdscr):
             )
         except curses.error:
             pass
-
+    msg = "Choose (1-8): "
     try:
-        msg = "Choose (1-8): "
         stdscr.addstr(h - 1, max(0, (w - len(msg)) // 2), msg, curses.color_pair(2))
     except curses.error:
         pass
 
 
 def main(stdscr):
-    try:
-        curses.curs_set(0)
-    except curses.error:
-        pass
-
     curses.start_color()
     try:
         curses.use_default_colors()
         bg = -1
-    except curses.error:
+    except:
         bg = curses.COLOR_BLACK
-
-    # Standardize our colors
-    curses.init_pair(1, curses.COLOR_RED, bg)
-    curses.init_pair(2, curses.COLOR_YELLOW, bg)
-    curses.init_pair(3, curses.COLOR_BLUE, bg)
-    curses.init_pair(4, curses.COLOR_GREEN, bg)
-    curses.init_pair(5, curses.COLOR_CYAN, bg)
-    curses.init_pair(6, curses.COLOR_MAGENTA, bg)
-    curses.init_pair(7, curses.COLOR_WHITE, bg)
+    for i, col in enumerate(
+        [
+            curses.COLOR_RED,
+            curses.COLOR_YELLOW,
+            curses.COLOR_BLUE,
+            curses.COLOR_GREEN,
+            curses.COLOR_CYAN,
+            curses.COLOR_MAGENTA,
+            curses.COLOR_WHITE,
+        ],
+        1,
+    ):
+        curses.init_pair(i, col, bg)
 
     theme_id = "1"
     if os.path.exists(PICKLE_FILE):
         try:
             with open(PICKLE_FILE, "rb") as f:
                 theme_id = pickle.load(f)
-        except Exception:
+        except:
             pass
 
     while True:
         todos = load_todos()
         stdscr.clear()
         draw_logo(stdscr, theme_id)
-        draw_table(stdscr, todos, start_y=8)
+        draw_table(stdscr, todos, 8)
         draw_main_menu(stdscr)
         stdscr.refresh()
-
         key = stdscr.getch()
-
         if key == ord("1"):
             add_mode(stdscr, todos, theme_id)
         elif key == ord("2"):
@@ -808,18 +771,21 @@ def main(stdscr):
         elif key == ord("5"):
             removeAll_mode(stdscr, todos, theme_id)
         elif key == ord("6"):
-            options = [
-                ("Catppuccin (Mocha)", "1"),
-                ("Dracula", "2"),
-                ("Gruvbox", "3"),
-                ("Nord", "4"),
-                ("Cancel", None),
-            ]
-            res = select_list(stdscr, "Choose a Color Scheme:", options, theme_id)
+            res = select_list(
+                stdscr,
+                "Theme:",
+                [
+                    ("Catppuccin", "1"),
+                    ("Dracula", "2"),
+                    ("Gruvbox", "3"),
+                    ("Nord", "4"),
+                    ("Cancel", None),
+                ],
+                theme_id,
+            )
             if res:
                 theme_id = res
-                with open(PICKLE_FILE, "wb") as f:
-                    pickle.dump(theme_id, f)
+                pickle.dump(theme_id, open(PICKLE_FILE, "wb"))
         elif key == ord("8"):
             grocery_sorter_mode(stdscr, theme_id)
         elif key in [ord("7"), 27]:
