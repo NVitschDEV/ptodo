@@ -750,7 +750,7 @@ def draw_calendar(stdscr, start_y, selected_day):
     header = f"{calendar.month_name[month]} {year}"
     days_header = "Mo Tu We Th Fr Sa Su"
 
-    col_width = 4
+    col_width = 3
     cal_width = len(days_header)
     row_x = max(0, (w - cal_width) // 2)
 
