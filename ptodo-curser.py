@@ -20,6 +20,7 @@ FILENAME = os.path.join(DATA_DIR, "TODOLIST.json")
 PICKLE_FILE = os.path.join(DATA_DIR, "theme_data_curses.pkl")
 GROCERY_DICT_FILE = os.path.join(DATA_DIR, "GROCERY_DICT.json")
 GROCERY_LIST_FILE = os.path.join(DATA_DIR, "GROCERY_LIST.json")
+APPOINTMENTS_FILE = os.path.join(DATA_DIR, "APPOINTMENTS.json")
 
 # Old file paths for migration purposes
 OLD_FILENAME = os.path.join(os.path.expanduser("~"), "TODOLIST.json")
@@ -364,6 +365,22 @@ def load_grocery_list(categories):
 def save_grocery_list(l):
     with open(GROCERY_LIST_FILE, "w") as f:
         json.dump(l, f, indent=4)
+
+
+def load_appointments():
+    """Loads appointments dictionary (date_key -> list of strings)."""
+    if os.path.exists(APPOINTMENTS_FILE):
+        try:
+            with open(APPOINTMENTS_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def save_appointments(appointments):
+    with open(APPOINTMENTS_FILE, "w") as f:
+        json.dump(appointments, f, indent=4)
 
 
 def draw_logo(stdscr, theme_id):
@@ -784,6 +801,54 @@ def draw_calendar(stdscr, start_y, selected_day):
         pass
 
 
+def draw_appointments(stdscr, appointments, date_key, start_y):
+    """Draws appointments right next to the calendar (same vertical start, shifted x)."""
+    h, w = stdscr.getmaxyx()
+    days_header = "Mo Tu We Th Fr Sa Su"
+    cal_width = len(days_header)
+    row_x = max(0, (w - cal_width) // 2)
+    appt_x = row_x + cal_width + 5
+
+    # Improved fallback for narrow terminals - place below calendar if needed
+    if appt_x + 45 > w:
+        appt_x = max(0, (w - 45) // 2)
+        start_y = start_y + 10  # push down to avoid calendar overlap
+
+    appts = appointments.get(date_key, [])
+
+    title = f"Appointments for {date_key}:"
+    try:
+        stdscr.addstr(start_y, appt_x, title, curses.color_pair(3) | curses.A_BOLD)
+    except curses.error:
+        pass
+
+    y = start_y + 1
+    if not appts:
+        try:
+            stdscr.addstr(
+                y, appt_x, "None scheduled.", curses.color_pair(7) | curses.A_DIM
+            )
+        except curses.error:
+            pass
+        return
+
+    for idx, appt in enumerate(appts, 1):
+        if y >= h - 12:  # tighter limit to protect bottom menu + prompts
+            try:
+                stdscr.addstr(
+                    y, appt_x, "(more...)", curses.color_pair(7) | curses.A_DIM
+                )
+            except curses.error:
+                pass
+            break
+        text = f"{idx}. {appt[:38]}" if len(appt) > 38 else f"{idx}. {appt}"
+        try:
+            stdscr.addstr(y, appt_x, text, curses.color_pair(2))
+        except curses.error:
+            pass
+        y += 1
+
+
 def draw_main_menu(stdscr):
     h, w = stdscr.getmaxyx()
     menu = [
@@ -795,14 +860,27 @@ def draw_main_menu(stdscr):
     for i, line in enumerate(menu):
         try:
             stdscr.addstr(
-                h - 6 + i,
+                h - 7 + i,
                 max(0, (w - len(line)) // 2),
                 line,
                 curses.color_pair(7) | curses.A_BOLD,
             )
         except curses.error:
             pass
-    msg = "Choose (1-8) or use Arrows for Calendar: "
+
+    # Minimal UI hint for appointments (right side of calendar, no new numbered option)
+    hint = "a = add appt   e# = edit #   d# = delete #   (selected day)"
+    try:
+        stdscr.addstr(
+            h - 3,
+            max(0, (w - len(hint)) // 2),
+            hint,
+            curses.color_pair(3) | curses.A_DIM,
+        )
+    except curses.error:
+        pass
+
+    msg = "Choose (1-8) or a/e/d for appointments or Arrows for Calendar: "
     try:
         stdscr.addstr(h - 1, max(0, (w - len(msg)) // 2), msg, curses.color_pair(2))
     except curses.error:
@@ -847,12 +925,16 @@ def main(stdscr):
     # Main Application Loop
     while True:
         todos = load_todos()
+        appointments = load_appointments()
         stdscr.clear()
         draw_logo(stdscr, theme_id)
 
         # Calculate dynamic position for calendar
         table_bottom_y = draw_table(stdscr, todos, 8)
-        draw_calendar(stdscr, table_bottom_y + 1, selected_day)
+        calendar_start_y = table_bottom_y + 1
+        draw_calendar(stdscr, calendar_start_y, selected_day)
+        date_key = f"{now.tm_year}-{now.tm_mon:02d}-{selected_day:02d}"
+        draw_appointments(stdscr, appointments, date_key, calendar_start_y)
 
         draw_main_menu(stdscr)
         stdscr.refresh()
@@ -867,6 +949,50 @@ def main(stdscr):
             selected_day = max(1, selected_day - 7)
         elif key == curses.KEY_DOWN:
             selected_day = min(last_day, selected_day + 7)
+
+        # === APPOINTMENT HANDLING (ALL INLINE - no new screen, no new menu) ===
+        elif key in [ord("a"), ord("A")]:
+            h, w = stdscr.getmaxyx()
+            appt = prompt_input(stdscr, f"Add appointment for {date_key}: ", h - 5, 2)
+            if appt and appt.strip():
+                if date_key not in appointments:
+                    appointments[date_key] = []
+                appointments[date_key].append(appt.strip())
+                save_appointments(appointments)
+
+        elif key in [ord("e"), ord("E")]:
+            h, w = stdscr.getmaxyx()
+            num_str = prompt_input(stdscr, "Edit appointment number: ", h - 5, 2)
+            if num_str.isdigit():
+                idx = int(num_str) - 1
+                appts = appointments.get(date_key, [])
+                if 0 <= idx < len(appts):
+                    new_text = prompt_input(
+                        stdscr,
+                        f"New text for #{num_str} (was: {appts[idx][:35]}...): ",
+                        h - 4,
+                        2,
+                    )
+                    if new_text and new_text.strip():
+                        appts[idx] = new_text.strip()
+                        save_appointments(appointments)
+
+        elif key in [ord("d"), ord("D")]:
+            h, w = stdscr.getmaxyx()
+            num_str = prompt_input(stdscr, "Delete appointment number: ", h - 5, 2)
+            if num_str.isdigit():
+                idx = int(num_str) - 1
+                appts = appointments.get(date_key, [])
+                if 0 <= idx < len(appts):
+                    confirm = prompt_input(
+                        stdscr,
+                        f"Delete '{appts[idx][:40]}'? (y/n): ",
+                        h - 4,
+                        2,
+                    )
+                    if confirm.lower() == "y":
+                        del appts[idx]
+                        save_appointments(appointments)
 
         # Route keys to specific modes
         elif key == ord("1"):
