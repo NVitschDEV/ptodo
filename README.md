@@ -18,6 +18,7 @@ We are happy about any feedback! Please do not hesitate.
 <img width="1832" height="1101" alt="image" src="https://github.com/user-attachments/assets/cc15da78-10da-49e4-a712-912747986a0b" />
 
 #IMPORTANT
+---
 ```bash
 If you installed V1 or V2, when you update the place where the Todolist is saved is getting migrated from the home folder to ~/ptodo/ you can delete the files in the Home folder.
 ```
