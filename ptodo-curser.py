@@ -592,14 +592,16 @@ def add_mode(stdscr, todos, theme_id):
 
 def complete_mode(stdscr, todos, theme_id):
     pending = [
-        (f"Task {i + 1}: {t['task']}", i) for i, t in enumerate(todos) if not t["done"]
+        (f"Task {i + 1}: {t['task']}", str(i))
+        for i, t in enumerate(todos)
+        if not t["done"]
     ]
     if not pending:
         return
-    pending.append(("EXIT", None))
+    pending.append(("EXIT", "__cancel__"))
     selected = select_list(stdscr, "Select a task to complete:", pending, theme_id)
-    if selected is not None:
-        todos[selected]["done"] = True
+    if selected is not None and selected != "__cancel__":
+        todos[int(selected)]["done"] = True
         save_todos(todos)
 
 
@@ -953,7 +955,14 @@ def main(stdscr):
         # === APPOINTMENT HANDLING (ALL INLINE - no new screen, no new menu) ===
         elif key in [ord("a"), ord("A")]:
             h, w = stdscr.getmaxyx()
-            appt = prompt_input(stdscr, f"Add appointment for {date_key}: ", h - 5, 2)
+            # Clear menu area before showing prompt
+            for i in range(10):
+                try:
+                    stdscr.addstr(h - 10 + i, 0, " " * (w - 1), curses.color_pair(7))
+                except curses.error:
+                    pass
+            stdscr.refresh()
+            appt = prompt_input(stdscr, f"Add appointment for {date_key}: ", h - 9, 2)
             if appt and appt.strip():
                 if date_key not in appointments:
                     appointments[date_key] = []
@@ -962,7 +971,14 @@ def main(stdscr):
 
         elif key in [ord("e"), ord("E")]:
             h, w = stdscr.getmaxyx()
-            num_str = prompt_input(stdscr, "Edit appointment number: ", h - 5, 2)
+            # Clear menu area before showing prompt
+            for i in range(10):
+                try:
+                    stdscr.addstr(h - 10 + i, 0, " " * (w - 1), curses.color_pair(7))
+                except curses.error:
+                    pass
+            stdscr.refresh()
+            num_str = prompt_input(stdscr, "Edit appointment number: ", h - 9, 2)
             if num_str.isdigit():
                 idx = int(num_str) - 1
                 appts = appointments.get(date_key, [])
@@ -970,7 +986,7 @@ def main(stdscr):
                     new_text = prompt_input(
                         stdscr,
                         f"New text for #{num_str} (was: {appts[idx][:35]}...): ",
-                        h - 4,
+                        h - 8,
                         2,
                     )
                     if new_text and new_text.strip():
@@ -979,7 +995,14 @@ def main(stdscr):
 
         elif key in [ord("d"), ord("D")]:
             h, w = stdscr.getmaxyx()
-            num_str = prompt_input(stdscr, "Delete appointment number: ", h - 5, 2)
+            # Clear menu area before showing prompt
+            for i in range(10):
+                try:
+                    stdscr.addstr(h - 10 + i, 0, " " * (w - 1), curses.color_pair(7))
+                except curses.error:
+                    pass
+            stdscr.refresh()
+            num_str = prompt_input(stdscr, "Delete appointment number: ", h - 9, 2)
             if num_str.isdigit():
                 idx = int(num_str) - 1
                 appts = appointments.get(date_key, [])
@@ -987,7 +1010,7 @@ def main(stdscr):
                     confirm = prompt_input(
                         stdscr,
                         f"Delete '{appts[idx][:40]}'? (y/n): ",
-                        h - 4,
+                        h - 8,
                         2,
                     )
                     if confirm.lower() == "y":
