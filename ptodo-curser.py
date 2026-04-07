@@ -4,11 +4,37 @@ import curses
 import json
 import os
 import pickle
+import shutil
 
-FILENAME = "TODOLIST.json"
-PICKLE_FILE = "theme_data_curses.pkl"
-GROCERY_DICT_FILE = "GROCERY_DICT.json"
-GROCERY_LIST_FILE = "GROCERY_LIST.json"
+DATA_DIR = os.path.expanduser("~/ptodo")
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# File paths, now in ~/ptodo/
+FILENAME = os.path.join(DATA_DIR, "TODOLIST.json")
+PICKLE_FILE = os.path.join(DATA_DIR, "theme_data_curses.pkl")
+GROCERY_DICT_FILE = os.path.join(DATA_DIR, "GROCERY_DICT.json")
+GROCERY_LIST_FILE = os.path.join(DATA_DIR, "GROCERY_LIST.json")
+
+# Old file paths
+OLD_FILENAME = os.path.join(os.path.expanduser("~"), "TODOLIST.json")
+OLD_PICKLE_FILE = os.path.join(os.path.expanduser("~"), "theme_data_curses.pkl")
+OLD_GROCERY_DICT_FILE = os.path.join(os.path.expanduser("~"), "GROCERY_DICT.json")
+OLD_GROCERY_LIST_FILE = os.path.join(os.path.expanduser("~"), "GROCERY_LIST.json")
+
+
+def migrate_files():
+    """Migrate files from home directory to ~/ptodo/ if they exist there."""
+    migrations = [
+        (OLD_FILENAME, FILENAME),
+        (OLD_PICKLE_FILE, PICKLE_FILE),
+        (OLD_GROCERY_DICT_FILE, GROCERY_DICT_FILE),
+        (OLD_GROCERY_LIST_FILE, GROCERY_LIST_FILE),
+    ]
+
+    for old_path, new_path in migrations:
+        if os.path.exists(old_path) and not os.path.exists(new_path):
+            shutil.copy2(old_path, new_path)
+
 
 LOGO = [
     r"___________________  ________    ________  .____    .___  _______________________",
@@ -784,4 +810,5 @@ def main(stdscr):
 
 
 if __name__ == "__main__":
+    migrate_files()
     curses.wrapper(main)
