@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+import calendar
 import curses
 import json
 import os
 import pickle
 import shutil
+import time
 
 """IMPORTANT"""
 """I replaced cat (the shortform for category) to kitty, dont ask why :)"""
@@ -404,7 +406,7 @@ def draw_table(stdscr, todos, start_y):
 
     y = start_y + 2
     for idx, item in enumerate(todos, 1):
-        if y >= h - 8:  # Leave space for the bottom menu
+        if y >= h - 18:  # Adjusted for calendar space
             break
         task_text = (
             item["task"][:27] + "..." if len(item["task"]) > 30 else item["task"]
@@ -738,6 +740,50 @@ def grocery_sorter_mode(stdscr, theme_id):
                     last_action = f"Added '{item_input}' once."
 
 
+def draw_calendar(stdscr, start_y, selected_day):
+    """Draws an interactive monthly calendar."""
+    h, w = stdscr.getmaxyx()
+    now = time.localtime()
+    year, month = now.tm_year, now.tm_mon
+
+    cal = calendar.monthcalendar(year, month)
+    header = f"{calendar.month_name[month]} {year}"
+    days_header = "Mo Tu We Th Fr Sa Su"
+
+    col_width = 4
+    cal_width = len(days_header)
+    row_x = max(0, (w - cal_width) // 2)
+
+    try:
+        stdscr.addstr(
+            start_y,
+            max(0, (w - len(header)) // 2),
+            header,
+            curses.color_pair(3) | curses.A_BOLD,
+        )
+        stdscr.addstr(start_y + 1, row_x, days_header, curses.color_pair(5))
+
+        for r_idx, week in enumerate(cal):
+            for c_idx, day in enumerate(week):
+                if day == 0:
+                    continue
+
+                day_str = f"{day:2}"
+                x = row_x + (c_idx * col_width)
+                y = start_y + 2 + r_idx
+
+                if day == selected_day:
+                    attr = curses.color_pair(4) | curses.A_REVERSE | curses.A_BOLD
+                elif day == now.tm_mday:
+                    attr = curses.color_pair(2) | curses.A_BOLD
+                else:
+                    attr = curses.color_pair(7)
+
+                stdscr.addstr(y, x, day_str, attr)
+    except curses.error:
+        pass
+
+
 def draw_main_menu(stdscr):
     h, w = stdscr.getmaxyx()
     menu = [
@@ -756,7 +802,7 @@ def draw_main_menu(stdscr):
             )
         except curses.error:
             pass
-    msg = "Choose (1-8): "
+    msg = "Choose (1-8) or use Arrows for Calendar: "
     try:
         stdscr.addstr(h - 1, max(0, (w - len(msg)) // 2), msg, curses.color_pair(2))
     except curses.error:
@@ -793,18 +839,37 @@ def main(stdscr):
         except:
             pass
 
+    # Calendar interaction state
+    now = time.localtime()
+    selected_day = now.tm_mday
+    _, last_day = calendar.monthrange(now.tm_year, now.tm_mon)
+
     # Main Application Loop
     while True:
         todos = load_todos()
         stdscr.clear()
         draw_logo(stdscr, theme_id)
-        draw_table(stdscr, todos, 8)
+
+        # Calculate dynamic position for calendar
+        table_bottom_y = draw_table(stdscr, todos, 8)
+        draw_calendar(stdscr, table_bottom_y + 1, selected_day)
+
         draw_main_menu(stdscr)
         stdscr.refresh()
         key = stdscr.getch()
 
+        # Keyboard Navigation for Calendar
+        if key == curses.KEY_LEFT:
+            selected_day = max(1, selected_day - 1)
+        elif key == curses.KEY_RIGHT:
+            selected_day = min(last_day, selected_day + 1)
+        elif key == curses.KEY_UP:
+            selected_day = max(1, selected_day - 7)
+        elif key == curses.KEY_DOWN:
+            selected_day = min(last_day, selected_day + 7)
+
         # Route keys to specific modes
-        if key == ord("1"):
+        elif key == ord("1"):
             add_mode(stdscr, todos, theme_id)
         elif key == ord("2"):
             complete_mode(stdscr, todos, theme_id)
