@@ -935,7 +935,7 @@ def main(stdscr):
 
         # --- STEP 1: Check for "Critical Minimum" (Hide everything) ---
         # If the window is too small to even show the menu or a task safely
-        if h < 14 or w < 60:
+        if h < 20 or w < 85:
             msg = "Window too small! Please increase."
             try:
                 stdscr.addstr(
