@@ -17,8 +17,15 @@ We are happy about any feedback! Please do not hesitate.
 ---
 <img width="1832" height="1101" alt="image" src="https://github.com/user-attachments/assets/cc15da78-10da-49e4-a712-912747986a0b" />
 
+#V4
+---
+<img width="887" height="1155" alt="image" src="https://github.com/user-attachments/assets/7c5de33c-7794-4787-adfb-09d5535c0ac9" />
+
+
 #IMPORTANT
 ---
+The rich based version isn't officially supported.
+
 ```bash
 If you installed V1 or V2, when you update the place where the Todolist is saved is getting migrated from the home folder to ~/ptodo/ you can delete the files in the Home folder.
 ```
