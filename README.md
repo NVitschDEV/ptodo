@@ -3,6 +3,8 @@
 This is a todolist app.
 If you run the install script you will be able to run it in the terminal with the command 'ptodo'.
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NVitschDEV/ptodo)
+
 We are happy about any feedback! Please do not hesitate.
 
 #V1
