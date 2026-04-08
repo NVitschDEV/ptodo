@@ -970,7 +970,7 @@ def main(stdscr):
                 if num_str.isdigit():
                     idx = int(num_str) - 1
                     if 0 <= idx < len(appointments[date_key]):
-                        new_val = prompt_input(stdscr, f"New text: ", h - 1, 2)
+                        new_val = prompt_input(stdscr, "New text: ", h - 1, 2)
                         if new_val:
                             appointments[date_key][idx] = new_val
                             save_appointments(appointments)
