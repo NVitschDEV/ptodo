@@ -45,9 +45,9 @@ def migrate_files():
 
 LOGO = [
     r"___________________  ________    ________  .____    .___  _______________________",
-    r"\__    ___/\_____  \ \______ \   \_____  \ |    |   |   |/      _____/\__    ___/",
-    r"  |    |    /   |   \ |    |  \   /   |   \|    |   |   |\_____  \      |    |   ",
-    r"  |    |   /    |    \|    `   \ /    |    \    |___|   |/        \     |    |   ",
+    r"\__    ___/\_____  \ \______ \    \_____  \ |    |   |   |/      _____/\__    ___/",
+    r"  |    |    /   |   \ |    |  \    /   |   \|    |   |   |\_____  \      |    |   ",
+    r"  |    |   /    |    \|    `    \ /    |    \    |___|   |/        \     |    |   ",
     r"  |____|   \_________/_________/ \_________/________\___/_________/     |____|   ",
 ]
 
@@ -305,20 +305,15 @@ DEFAULT_CATEGORIES = {
 
 
 def load_todos():
-    """Loads tasks and ensures backwards compatibility by assigning default priorities."""
     if os.path.exists(FILENAME):
         try:
             with open(FILENAME, "r") as f:
                 data = json.load(f)
                 for item in data:
                     if isinstance(item, dict) and "priority" not in item:
-                        item["priority"] = "4"  # Default priority
-
-                # Handle legacy string-only lists
+                        item["priority"] = "4"
                 if data and isinstance(data[0], str):
                     return [{"task": t, "done": False, "priority": "4"} for t in data]
-
-                # Sort: Pending items first, then by priority
                 data.sort(key=lambda x: (x.get("done", False), x.get("priority", "4")))
                 return data
         except Exception:
@@ -347,13 +342,11 @@ def save_grocery_dict(d):
 
 
 def load_grocery_list(categories):
-    """Loads the active grocery list and synchronizes it with current categories."""
     if os.path.exists(GROCERY_LIST_FILE):
         try:
             with open(GROCERY_LIST_FILE, "r") as f:
                 data = json.load(f)
-                # Sync missing categories
-                for kitty in categories:  # kitty instead of cat :)
+                for kitty in categories:
                     if kitty not in data:
                         data[kitty] = []
                 return data
@@ -368,7 +361,6 @@ def save_grocery_list(l):
 
 
 def load_appointments():
-    """Loads appointments dictionary (date_key -> list of strings)."""
     if os.path.exists(APPOINTMENTS_FILE):
         try:
             with open(APPOINTMENTS_FILE, "r") as f:
@@ -384,7 +376,6 @@ def save_appointments(appointments):
 
 
 def draw_logo(stdscr, theme_id):
-    """Maps theme_ids to curses color pairs and centers the logo."""
     themes = {"1": (6, 3), "2": (6, 5), "3": (1, 2), "4": (5, 3)}
     c1_idx, c2_idx = themes.get(theme_id, (6, 3))
     h, w = stdscr.getmaxyx()
@@ -398,7 +389,6 @@ def draw_logo(stdscr, theme_id):
 
 
 def draw_table(stdscr, todos, start_y):
-    """Draws the formatted todo table, preventing output beyond terminal height."""
     h, w = stdscr.getmaxyx()
     if not todos:
         msg = "No tasks found! Get to work!"
@@ -423,7 +413,7 @@ def draw_table(stdscr, todos, start_y):
 
     y = start_y + 2
     for idx, item in enumerate(todos, 1):
-        if y >= h - 18:  # Adjusted for calendar space
+        if y >= h - 18:
             break
         task_text = (
             item["task"][:27] + "..." if len(item["task"]) > 30 else item["task"]
@@ -464,7 +454,6 @@ def draw_table(stdscr, todos, start_y):
 
 
 def draw_grocery_table(stdscr, grocery_list, start_y):
-    """Flattens the grocery dictionary into a displayable list, showing only recent items to fit screen."""
     h, w = stdscr.getmaxyx()
     flat_list = []
     for cat, items in grocery_list.items():
@@ -510,7 +499,6 @@ def draw_grocery_table(stdscr, grocery_list, start_y):
 
 
 def prompt_input(stdscr, prompt_text, y, x):
-    """Displays a prompt and captures user string input via curses echo."""
     try:
         stdscr.addstr(y, x, prompt_text, curses.color_pair(4) | curses.A_BOLD)
         curses.curs_set(1)
@@ -524,7 +512,6 @@ def prompt_input(stdscr, prompt_text, y, x):
 
 
 def select_list(stdscr, title, items, theme_id):
-    """Generic scrolling interactive menu. Returns the value of the selected item."""
     current = 0
     while True:
         stdscr.clear()
@@ -540,7 +527,6 @@ def select_list(stdscr, title, items, theme_id):
         except curses.error:
             pass
 
-        # Calculate sliding window for scrolling
         max_visible = h - 12
         start_idx = max(0, current - max_visible // 2)
         end_idx = min(len(items), start_idx + max_visible)
@@ -564,13 +550,12 @@ def select_list(stdscr, title, items, theme_id):
             current -= 1
         elif key == curses.KEY_DOWN and current < len(items) - 1:
             current += 1
-        elif key in [10, 13]:  # Enter keys
+        elif key in [10, 13]:
             return items[current][1]
-        elif key == 27:  # Escape key
+        elif key == 27:
             return None
 
 
-# --- Action Modes ---
 def add_mode(stdscr, todos, theme_id):
     stdscr.clear()
     draw_logo(stdscr, theme_id)
@@ -657,7 +642,6 @@ def removeAll_mode(stdscr, todos, theme_id):
 
 
 def grocery_sorter_mode(stdscr, theme_id):
-    """Interactive loop for auto-categorizing inputs based on GROCERY_DICT keywords."""
     category_keywords = load_grocery_dict()
     sorted_groceries = load_grocery_list(category_keywords.keys())
     last_action = ""
@@ -666,7 +650,6 @@ def grocery_sorter_mode(stdscr, theme_id):
         stdscr.clear()
         draw_logo(stdscr, theme_id)
         h, w = stdscr.getmaxyx()
-
         title = "--- SMART GROCERY SORTER ---"
         try:
             stdscr.addstr(
@@ -683,23 +666,20 @@ def grocery_sorter_mode(stdscr, theme_id):
             pass
 
         draw_grocery_table(stdscr, sorted_groceries, 9)
-
-        prompt_str = "Item (or 'done', '!addword', '!clear'): "
-        item_input = prompt_input(stdscr, prompt_str, h - 4, 2)
+        item_input = prompt_input(
+            stdscr, "Item (or 'done', '!addword', '!clear'): ", h - 4, 2
+        )
 
         if not item_input:
             continue
         if item_input.lower() == "done":
             break
-
-        # Admin command: Clear list
         if item_input.lower() == "!clear":
             sorted_groceries = {cat: [] for cat in category_keywords}
             save_grocery_list(sorted_groceries)
             last_action = "List cleared."
             continue
 
-        # Admin command: Explicitly teach a new keyword
         if item_input.lower() == "!addword":
             new_word = prompt_input(stdscr, "Keyword to teach: ", h - 3, 2)
             if new_word:
@@ -718,8 +698,6 @@ def grocery_sorter_mode(stdscr, theme_id):
 
         item_normalized = item_input.lower()
         assigned = False
-
-        # Check if the input contains any known category keywords
         for category, keywords in category_keywords.items():
             if any(kw in item_normalized for kw in keywords if kw):
                 sorted_groceries[category].append(item_input)
@@ -728,7 +706,6 @@ def grocery_sorter_mode(stdscr, theme_id):
                 assigned = True
                 break
 
-        # Fallback if unknown: ask user to categorize
         if not assigned:
             chosen_kitty = select_list(
                 stdscr,
@@ -741,8 +718,6 @@ def grocery_sorter_mode(stdscr, theme_id):
                 save_grocery_list(sorted_groceries)
                 stdscr.clear()
                 draw_logo(stdscr, theme_id)
-
-                # Ask if dictionary should be updated for next time
                 if (
                     prompt_input(
                         stdscr,
@@ -759,16 +734,13 @@ def grocery_sorter_mode(stdscr, theme_id):
                     last_action = f"Added '{item_input}' once."
 
 
-def draw_calendar(stdscr, start_y, selected_day):
-    """Draws an interactive monthly calendar."""
+def draw_calendar(stdscr, start_y, selected_day, year, month):
+    """Draws an interactive monthly calendar for a specific month/year."""
     h, w = stdscr.getmaxyx()
     now = time.localtime()
-    year, month = now.tm_year, now.tm_mon
-
     cal = calendar.monthcalendar(year, month)
     header = f"{calendar.month_name[month]} {year}"
     days_header = "Mo Tu We Th Fr Sa Su"
-
     col_width = 3
     cal_width = len(days_header)
     row_x = max(0, (w - cal_width) // 2)
@@ -786,44 +758,36 @@ def draw_calendar(stdscr, start_y, selected_day):
             for c_idx, day in enumerate(week):
                 if day == 0:
                     continue
-
                 day_str = f"{day:2}"
                 x = row_x + (c_idx * col_width)
                 y = start_y + 2 + r_idx
 
                 if day == selected_day:
                     attr = curses.color_pair(4) | curses.A_REVERSE | curses.A_BOLD
-                elif day == now.tm_mday:
+                elif day == now.tm_mday and month == now.tm_mon and year == now.tm_year:
                     attr = curses.color_pair(2) | curses.A_BOLD
                 else:
                     attr = curses.color_pair(7)
-
                 stdscr.addstr(y, x, day_str, attr)
     except curses.error:
         pass
 
 
 def draw_appointments(stdscr, appointments, date_key, start_y):
-    """Draws appointments right next to the calendar (same vertical start, shifted x)."""
     h, w = stdscr.getmaxyx()
     days_header = "Mo Tu We Th Fr Sa Su"
     cal_width = len(days_header)
     row_x = max(0, (w - cal_width) // 2)
     appt_x = row_x + cal_width + 5
-
-    # Improved fallback for narrow terminals - place below calendar if needed
     if appt_x + 45 > w:
         appt_x = max(0, (w - 45) // 2)
-        start_y = start_y + 10  # push down to avoid calendar overlap
-
+        start_y = start_y + 10
     appts = appointments.get(date_key, [])
-
     title = f"Appointments for {date_key}:"
     try:
         stdscr.addstr(start_y, appt_x, title, curses.color_pair(3) | curses.A_BOLD)
     except curses.error:
         pass
-
     y = start_y + 1
     if not appts:
         try:
@@ -833,9 +797,8 @@ def draw_appointments(stdscr, appointments, date_key, start_y):
         except curses.error:
             pass
         return
-
     for idx, appt in enumerate(appts, 1):
-        if y >= h - 12:  # tighter limit to protect bottom menu + prompts
+        if y >= h - 12:
             try:
                 stdscr.addstr(
                     y, appt_x, "(more...)", curses.color_pair(7) | curses.A_DIM
@@ -869,8 +832,6 @@ def draw_main_menu(stdscr):
             )
         except curses.error:
             pass
-
-    # Minimal UI hint for appointments (right side of calendar, no new numbered option)
     hint = "a = add appt   e# = edit #   d# = delete #   (selected day)"
     try:
         stdscr.addstr(
@@ -881,7 +842,6 @@ def draw_main_menu(stdscr):
         )
     except curses.error:
         pass
-
     msg = "Choose (1-8) or a/e/d for appointments or Arrows for Calendar: "
     try:
         stdscr.addstr(h - 1, max(0, (w - len(msg)) // 2), msg, curses.color_pair(2))
@@ -890,7 +850,6 @@ def draw_main_menu(stdscr):
 
 
 def main(stdscr):
-    # Curses color initializations
     curses.start_color()
     try:
         curses.use_default_colors()
@@ -920,21 +879,18 @@ def main(stdscr):
         except:
             pass
 
-    # Calendar interaction state
+    # Persistent Calendar View State
     now = time.localtime()
+    cur_year = now.tm_year
+    cur_month = now.tm_mon
     selected_day = now.tm_mday
-    _, last_day = calendar.monthrange(now.tm_year, now.tm_mon)
 
-    # Main Application Loop
     while True:
         todos = load_todos()
         appointments = load_appointments()
         stdscr.clear()
-
         h, w = stdscr.getmaxyx()
 
-        # --- STEP 1: Check for "Critical Minimum" (Hide everything) ---
-        # If the window is too small to even show the menu or a task safely
         if h < 20 or w < 85:
             msg = "Window too small! Please increase."
             try:
@@ -947,50 +903,60 @@ def main(stdscr):
             except curses.error:
                 pass
             stdscr.refresh()
-            key = stdscr.getch()
-            if key in [ord("7"), 27]:
+            if stdscr.getch() in [ord("7"), 27]:
                 break
             continue
 
-        # --- STEP 2: Render Header and Table ---
         draw_logo(stdscr, theme_id)
         table_bottom_y = draw_table(stdscr, todos, 8)
 
-        # --- STEP 3: Conditional Calendar (Hide if not enough vertical space) ---
-        # The calendar needs about 10 lines of height to look decent
-        # We check if there's enough room between the table and the menu (which starts at h-7)
         if h > 30:
             calendar_start_y = table_bottom_y + 1
-            draw_calendar(stdscr, calendar_start_y, selected_day)
-            date_key = f"{now.tm_year}-{now.tm_mon:02d}-{selected_day:02d}"
+            draw_calendar(stdscr, calendar_start_y, selected_day, cur_year, cur_month)
+            date_key = f"{cur_year}-{cur_month:02d}-{selected_day:02d}"
             draw_appointments(stdscr, appointments, date_key, calendar_start_y)
 
-        # --- STEP 4: Render Menu ---
         draw_main_menu(stdscr)
         stdscr.refresh()
         key = stdscr.getch()
 
-        # Keyboard Navigation for Calendar (Only works if calendar is visible/selected_day is relevant)
-        if key == curses.KEY_LEFT:
-            selected_day = max(1, selected_day - 1)
-        elif key == curses.KEY_RIGHT:
-            selected_day = min(last_day, selected_day + 1)
-        elif key == curses.KEY_UP:
-            selected_day = max(1, selected_day - 7)
-        elif key == curses.KEY_DOWN:
-            selected_day = min(last_day, selected_day + 7)
+        # Update last day of current view month
+        _, last_day = calendar.monthrange(cur_year, cur_month)
 
-        # === APPOINTMENT HANDLING ===
+        # Calendar Navigation
+        if key == curses.KEY_LEFT:
+            selected_day -= 1
+        elif key == curses.KEY_RIGHT:
+            selected_day += 1
+        elif key == curses.KEY_UP:
+            selected_day -= 7
+        elif key == curses.KEY_DOWN:
+            selected_day += 7
+
+        # Handle Month Switching (Underflow)
+        if selected_day < 1:
+            cur_month -= 1
+            if cur_month < 1:
+                cur_month = 12
+                cur_year -= 1
+            _, prev_last = calendar.monthrange(cur_year, cur_month)
+            # If moving left from 1, go to last day. If moving up, wrap naturally.
+            selected_day = (
+                prev_last + selected_day if key == curses.KEY_UP else prev_last
+            )
+
+        # Handle Month Switching (Overflow)
+        elif selected_day > last_day:
+            cur_month += 1
+            if cur_month > 12:
+                cur_month = 1
+                cur_year += 1
+            # If moving right from last day, go to 1. If moving down, wrap naturally.
+            selected_day = selected_day - last_day if key == curses.KEY_DOWN else 1
+
         elif key in [ord("a"), ord("A")]:
-            # (Your existing appointment logic remains the same)
-            h, w = stdscr.getmaxyx()
-            for i in range(10):
-                try:
-                    stdscr.addstr(h - 10 + i, 0, " " * (w - 1), curses.color_pair(7))
-                except curses.error:
-                    pass
-            stdscr.refresh()
-            date_key = f"{now.tm_year}-{now.tm_mon:02d}-{selected_day:02d}"
+            # Appointment input logic
+            date_key = f"{cur_year}-{cur_month:02d}-{selected_day:02d}"
             appt = prompt_input(stdscr, f"Add appointment for {date_key}: ", h - 9, 2)
             if appt and appt.strip():
                 if date_key not in appointments:
@@ -998,7 +964,6 @@ def main(stdscr):
                 appointments[date_key].append(appt.strip())
                 save_appointments(appointments)
 
-        # (Rest of your key routing 1-8 remains the same...)
         elif key == ord("1"):
             add_mode(stdscr, todos, theme_id)
         elif key == ord("2"):
@@ -1024,7 +989,8 @@ def main(stdscr):
             )
             if res:
                 theme_id = res
-                pickle.dump(theme_id, open(PICKLE_FILE, "wb"))
+                with open(PICKLE_FILE, "wb") as f:
+                    pickle.dump(theme_id, f)
         elif key == ord("8"):
             grocery_sorter_mode(stdscr, theme_id)
         elif key in [ord("7"), 27]:
