@@ -46,8 +46,8 @@ def migrate_files():
 LOGO = [
     r"___________________  ________    ________  .____    .___  _______________________",
     r"\__    ___/\_____  \ \______ \    \_____  \ |    |   |   |/      _____/\__    ___/",
-    r"  |    |    /   |   \ |    |  \    /   |   \|    |   |   |\_____  \      |    |   ",
-    r"  |    |   /    |    \|    `    \ /    |    \    |___|   |/        \     |    |   ",
+    r"  |    |    /    |   \ |    |  \    /    |   \|    |   |   |\_____  \      |    |   ",
+    r"  |    |   /     |    \|    `    \ /     |    \    |___|   |/        \     |    |   ",
     r"  |____|   \_________/_________/ \_________/________\___/_________/     |____|   ",
 ]
 
@@ -500,7 +500,6 @@ def draw_grocery_table(stdscr, grocery_list, start_y):
 
 def prompt_input(stdscr, prompt_text, y, x):
     try:
-        # Clear the specific line before writing prompt
         stdscr.move(y, 0)
         stdscr.clrtoeol()
         stdscr.addstr(y, x, prompt_text, curses.color_pair(4) | curses.A_BOLD)
@@ -738,7 +737,6 @@ def grocery_sorter_mode(stdscr, theme_id):
 
 
 def draw_calendar(stdscr, start_y, selected_day, year, month):
-    """Draws an interactive monthly calendar for a specific month/year."""
     h, w = stdscr.getmaxyx()
     now = time.localtime()
     cal = calendar.monthcalendar(year, month)
@@ -926,7 +924,6 @@ def main(stdscr):
 
         _, last_day = calendar.monthrange(cur_year, cur_month)
 
-        # Navigation logic (kept exactly as before)
         if key == curses.KEY_LEFT:
             selected_day -= 1
         elif key == curses.KEY_RIGHT:
@@ -952,7 +949,7 @@ def main(stdscr):
                 cur_year += 1
             selected_day = selected_day - last_day if key == curses.KEY_DOWN else 1
 
-        # Appointment Logic: ADD (Now Hides Menu)
+        # Appointment Logic: ADD
         elif key in [ord("a"), ord("A")]:
             stdscr.clear()
             draw_logo(stdscr, theme_id)
@@ -963,14 +960,16 @@ def main(stdscr):
                 )
                 draw_appointments(stdscr, appointments, date_key, calendar_start_y)
 
-            appt = prompt_input(stdscr, f"Add appt for {date_key}: ", h - 2, 2)
+            appt = prompt_input(
+                stdscr, f"Add appt for {date_key} (Enter to exit): ", h - 2, 2
+            )
             if appt and appt.strip():
                 if date_key not in appointments:
                     appointments[date_key] = []
                 appointments[date_key].append(appt.strip())
                 save_appointments(appointments)
 
-        # Appointment Logic: EDIT (Now Hides Menu)
+        # Appointment Logic: EDIT
         elif key in [ord("e"), ord("E")]:
             if date_key in appointments and appointments[date_key]:
                 stdscr.clear()
@@ -982,18 +981,20 @@ def main(stdscr):
                     )
                     draw_appointments(stdscr, appointments, date_key, calendar_start_y)
 
-                num_str = prompt_input(stdscr, "Edit Appt # (or 'exit'): ", h - 2, 2)
+                num_str = prompt_input(
+                    stdscr, "Edit Appt # (Enter to exit): ", h - 2, 2
+                )
                 if num_str.isdigit():
                     idx = int(num_str) - 1
                     if 0 <= idx < len(appointments[date_key]):
                         new_val = prompt_input(
-                            stdscr, f"New text (Enter to keep): ", h - 1, 2
+                            stdscr, f"New text (Enter to cancel): ", h - 1, 2
                         )
                         if new_val:
                             appointments[date_key][idx] = new_val
                             save_appointments(appointments)
 
-        # Appointment Logic: DELETE (Now Hides Menu)
+        # Appointment Logic: DELETE
         elif key in [ord("d"), ord("D")]:
             if date_key in appointments and appointments[date_key]:
                 stdscr.clear()
@@ -1005,7 +1006,9 @@ def main(stdscr):
                     )
                     draw_appointments(stdscr, appointments, date_key, calendar_start_y)
 
-                num_str = prompt_input(stdscr, "Delete Appt # (or 'exit'): ", h - 2, 2)
+                num_str = prompt_input(
+                    stdscr, "Delete Appt # (Enter to exit): ", h - 2, 2
+                )
                 if num_str.isdigit():
                     idx = int(num_str) - 1
                     if 0 <= idx < len(appointments[date_key]):
