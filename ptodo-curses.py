@@ -892,7 +892,13 @@ def main(stdscr):
 
         # Relaxed height check: As long as there are 10 lines, try to draw
         if h < 20:
-            msg = "Too small!"
+            msg = r"""
+            _____   ___   ___    ____   __  __     _     _     _
+           |_   _| / _ \ / _ \  / ___| |  \/  |   / \   | |   | |
+             | |  | | | | | | | \___ \ | |\/| |  / _ \  | |   | |
+             | |  | |_| | |_| |  ___)  | |  | | / ___ \ | |___| |___
+             |_|   \___/ \___/  |____/ |_|  |_|/_/   \_\|_____|_____|
+             """
             try:
                 stdscr.addstr(0, 0, msg)
             except:
