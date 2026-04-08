@@ -456,9 +456,9 @@ def draw_table(stdscr, todos, start_y):
 def draw_grocery_table(stdscr, grocery_list, start_y):
     h, w = stdscr.getmaxyx()
     flat_list = []
-    for cat, items in grocery_list.items():
+    for kitty, items in grocery_list.items():
         for item in items:
-            flat_list.append((cat, item))
+            flat_list.append((kitty, item))
 
     if not flat_list:
         msg = "Your grocery list is empty!"
@@ -487,10 +487,10 @@ def draw_grocery_table(stdscr, grocery_list, start_y):
         flat_list[-visible_count:] if len(flat_list) > visible_count else flat_list
     )
 
-    for idx, (cat, item) in enumerate(display_items, 1):
+    for idx, (kitty, item) in enumerate(display_items, 1):
         try:
             stdscr.addstr(y, row_x, f"{idx:<4} | ", curses.color_pair(7))
-            stdscr.addstr(y, row_x + 7, f"{cat:<25}", curses.color_pair(6))
+            stdscr.addstr(y, row_x + 7, f"{kitty:<25}", curses.color_pair(6))
             stdscr.addstr(y, row_x + 33, f"| {item:<30}", curses.color_pair(7))
         except curses.error:
             pass
@@ -500,6 +500,9 @@ def draw_grocery_table(stdscr, grocery_list, start_y):
 
 def prompt_input(stdscr, prompt_text, y, x):
     try:
+        # Clear the specific line before writing prompt
+        stdscr.move(y, 0)
+        stdscr.clrtoeol()
         stdscr.addstr(y, x, prompt_text, curses.color_pair(4) | curses.A_BOLD)
         curses.curs_set(1)
         curses.echo()
@@ -675,7 +678,7 @@ def grocery_sorter_mode(stdscr, theme_id):
         if item_input.lower() == "done":
             break
         if item_input.lower() == "!clear":
-            sorted_groceries = {cat: [] for cat in category_keywords}
+            sorted_groceries = {kitty: [] for kitty in category_keywords}
             save_grocery_list(sorted_groceries)
             last_action = "List cleared."
             continue
@@ -698,11 +701,11 @@ def grocery_sorter_mode(stdscr, theme_id):
 
         item_normalized = item_input.lower()
         assigned = False
-        for category, keywords in category_keywords.items():
+        for kitty, keywords in category_keywords.items():
             if any(kw in item_normalized for kw in keywords if kw):
-                sorted_groceries[category].append(item_input)
+                sorted_groceries[kitty].append(item_input)
                 save_grocery_list(sorted_groceries)
-                last_action = f"Auto-added '{item_input}' to {category}."
+                last_action = f"Auto-added '{item_input}' to {kitty}."
                 assigned = True
                 break
 
@@ -832,7 +835,7 @@ def draw_main_menu(stdscr):
             )
         except curses.error:
             pass
-    hint = "a = add appt   e# = edit #   d# = delete #   (selected day)"
+    hint = "a = add appt   e = edit appt   d = delete appt   (selected day)"
     try:
         stdscr.addstr(
             h - 3,
@@ -910,20 +913,20 @@ def main(stdscr):
         draw_logo(stdscr, theme_id)
         table_bottom_y = draw_table(stdscr, todos, 8)
 
+        calendar_start_y = table_bottom_y + 1
+        date_key = f"{cur_year}-{cur_month:02d}-{selected_day:02d}"
+
         if h > 30:
-            calendar_start_y = table_bottom_y + 1
             draw_calendar(stdscr, calendar_start_y, selected_day, cur_year, cur_month)
-            date_key = f"{cur_year}-{cur_month:02d}-{selected_day:02d}"
             draw_appointments(stdscr, appointments, date_key, calendar_start_y)
 
         draw_main_menu(stdscr)
         stdscr.refresh()
         key = stdscr.getch()
 
-        # Update last day of current view month
         _, last_day = calendar.monthrange(cur_year, cur_month)
 
-        # Calendar Navigation
+        # Navigation logic (kept exactly as before)
         if key == curses.KEY_LEFT:
             selected_day -= 1
         elif key == curses.KEY_RIGHT:
@@ -933,36 +936,83 @@ def main(stdscr):
         elif key == curses.KEY_DOWN:
             selected_day += 7
 
-        # Handle Month Switching (Underflow)
         if selected_day < 1:
             cur_month -= 1
             if cur_month < 1:
                 cur_month = 12
                 cur_year -= 1
             _, prev_last = calendar.monthrange(cur_year, cur_month)
-            # If moving left from 1, go to last day. If moving up, wrap naturally.
             selected_day = (
                 prev_last + selected_day if key == curses.KEY_UP else prev_last
             )
-
-        # Handle Month Switching (Overflow)
         elif selected_day > last_day:
             cur_month += 1
             if cur_month > 12:
                 cur_month = 1
                 cur_year += 1
-            # If moving right from last day, go to 1. If moving down, wrap naturally.
             selected_day = selected_day - last_day if key == curses.KEY_DOWN else 1
 
+        # Appointment Logic: ADD (Now Hides Menu)
         elif key in [ord("a"), ord("A")]:
-            # Appointment input logic
-            date_key = f"{cur_year}-{cur_month:02d}-{selected_day:02d}"
-            appt = prompt_input(stdscr, f"Add appointment for {date_key}: ", h - 9, 2)
+            stdscr.clear()
+            draw_logo(stdscr, theme_id)
+            draw_table(stdscr, todos, 8)
+            if h > 30:
+                draw_calendar(
+                    stdscr, calendar_start_y, selected_day, cur_year, cur_month
+                )
+                draw_appointments(stdscr, appointments, date_key, calendar_start_y)
+
+            appt = prompt_input(stdscr, f"Add appt for {date_key}: ", h - 2, 2)
             if appt and appt.strip():
                 if date_key not in appointments:
                     appointments[date_key] = []
                 appointments[date_key].append(appt.strip())
                 save_appointments(appointments)
+
+        # Appointment Logic: EDIT (Now Hides Menu)
+        elif key in [ord("e"), ord("E")]:
+            if date_key in appointments and appointments[date_key]:
+                stdscr.clear()
+                draw_logo(stdscr, theme_id)
+                draw_table(stdscr, todos, 8)
+                if h > 30:
+                    draw_calendar(
+                        stdscr, calendar_start_y, selected_day, cur_year, cur_month
+                    )
+                    draw_appointments(stdscr, appointments, date_key, calendar_start_y)
+
+                num_str = prompt_input(stdscr, "Edit Appt # (or 'exit'): ", h - 2, 2)
+                if num_str.isdigit():
+                    idx = int(num_str) - 1
+                    if 0 <= idx < len(appointments[date_key]):
+                        new_val = prompt_input(
+                            stdscr, f"New text (Enter to keep): ", h - 1, 2
+                        )
+                        if new_val:
+                            appointments[date_key][idx] = new_val
+                            save_appointments(appointments)
+
+        # Appointment Logic: DELETE (Now Hides Menu)
+        elif key in [ord("d"), ord("D")]:
+            if date_key in appointments and appointments[date_key]:
+                stdscr.clear()
+                draw_logo(stdscr, theme_id)
+                draw_table(stdscr, todos, 8)
+                if h > 30:
+                    draw_calendar(
+                        stdscr, calendar_start_y, selected_day, cur_year, cur_month
+                    )
+                    draw_appointments(stdscr, appointments, date_key, calendar_start_y)
+
+                num_str = prompt_input(stdscr, "Delete Appt # (or 'exit'): ", h - 2, 2)
+                if num_str.isdigit():
+                    idx = int(num_str) - 1
+                    if 0 <= idx < len(appointments[date_key]):
+                        appointments[date_key].pop(idx)
+                        if not appointments[date_key]:
+                            del appointments[date_key]
+                        save_appointments(appointments)
 
         elif key == ord("1"):
             add_mode(stdscr, todos, theme_id)
