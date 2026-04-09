@@ -115,6 +115,7 @@ DEFAULT_CATEGORIES = {
         "milk",
         "cheese",
         "yogurt",
+        "yoghurt",
         "butter",
         "egg",
         "cream",
