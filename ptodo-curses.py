@@ -390,14 +390,20 @@ def draw_logo(stdscr, theme_id):
             pass
 
 
-def draw_table(stdscr, todos, start_y):
+def draw_table(stdscr, todos, start_y, start_x=None):
     h, w = stdscr.getmaxyx()
     if not todos:
         msg = "No tasks found! Get to work!"
+        # If start_x is provided, center over the expected width of the table (68 chars)
+        if start_x is not None:
+            row_x = start_x + max(0, (68 - len(msg)) // 2)
+        else:
+            row_x = max(0, (w - len(msg)) // 2)
+
         try:
             stdscr.addstr(
                 start_y,
-                max(0, (w - len(msg)) // 2),
+                row_x,
                 msg,
                 curses.color_pair(1) | curses.A_BOLD,
             )
@@ -406,7 +412,8 @@ def draw_table(stdscr, todos, start_y):
         return start_y + 2
 
     header = f"{'#':<4} | {'Priority':<10} | {'Task':<30} | {'Status':>15}"
-    row_x = max(0, (w - len(header)) // 2)
+    row_x = start_x if start_x is not None else max(0, (w - len(header)) // 2)
+
     try:
         if start_y < h:
             stdscr.addstr(start_y, row_x, header, curses.color_pair(6) | curses.A_BOLD)
@@ -739,33 +746,47 @@ def grocery_sorter_mode(stdscr, theme_id):
                     last_action = f"Added '{item_input}' once."
 
 
-def draw_calendar(stdscr, start_y, selected_day, year, month):
+def draw_calendar(stdscr, start_y, start_x, selected_day, year, month, large=False):
     h, w = stdscr.getmaxyx()
     if start_y + 5 >= h:
-        return  # Skip if no room
+        return start_y  # Skip if no room
+
     now = time.localtime()
     cal = calendar.monthcalendar(year, month)
     header = f"{calendar.month_name[month]} {year}"
-    days_header = "Mo Tu We Th Fr Sa Su"
-    col_width = 3
+
+    if large:
+        days_header = " Mon   Tue   Wed   Thu   Fri   Sat   Sun"
+        col_width = 6
+    else:
+        days_header = "Mo Tu We Th Fr Sa Su"
+        col_width = 3
+
     cal_width = len(days_header)
-    row_x = max(0, (w - cal_width) // 2)
+    row_x = start_x if start_x is not None else max(0, (w - cal_width) // 2)
+    header_x = (
+        start_x + (cal_width - len(header)) // 2
+        if start_x is not None
+        else max(0, (w - len(header)) // 2)
+    )
 
     try:
         stdscr.addstr(
             start_y,
-            max(0, (w - len(header)) // 2),
+            header_x,
             header,
             curses.color_pair(3) | curses.A_BOLD,
         )
         stdscr.addstr(start_y + 1, row_x, days_header, curses.color_pair(5))
 
+        last_y = start_y + 1
         for r_idx, week in enumerate(cal):
             for c_idx, day in enumerate(week):
                 if day == 0:
                     continue
+
                 day_str = f"{day:2}"
-                x = row_x + (c_idx * col_width)
+                x = row_x + (c_idx * col_width) + (1 if large else 0)
                 y = start_y + 2 + r_idx
                 if y >= h - 8:
                     break  # Don't overlap menu
@@ -776,22 +797,31 @@ def draw_calendar(stdscr, start_y, selected_day, year, month):
                     attr = curses.color_pair(2) | curses.A_BOLD
                 else:
                     attr = curses.color_pair(7)
+
                 stdscr.addstr(y, x, day_str, attr)
+                last_y = max(last_y, y)
+        return last_y
     except curses.error:
-        pass
+        return start_y
 
 
-def draw_appointments(stdscr, appointments, date_key, start_y):
+def draw_appointments(
+    stdscr, appointments, date_key, start_y, start_x=None, is_wide=False
+):
     h, w = stdscr.getmaxyx()
     if start_y >= h - 8:
         return
-    days_header = "Mo Tu We Th Fr Sa Su"
-    cal_width = len(days_header)
-    row_x = max(0, (w - cal_width) // 2)
-    appt_x = row_x + cal_width + 5
-    if appt_x + 45 > w:
-        appt_x = max(0, (w - 45) // 2)
-        start_y = start_y + 8  # Move below calendar if narrow
+
+    if is_wide and start_x is not None:
+        appt_x = start_x
+    else:
+        days_header = "Mo Tu We Th Fr Sa Su"
+        cal_width = len(days_header)
+        row_x = max(0, (w - cal_width) // 2)
+        appt_x = row_x + cal_width + 5
+        if appt_x + 45 > w:
+            appt_x = max(0, (w - 45) // 2)
+            start_y = start_y + 8  # Move below calendar if narrow
 
     appts = appointments.get(date_key, [])
     title = f"Appts for {date_key}:"
@@ -800,6 +830,7 @@ def draw_appointments(stdscr, appointments, date_key, start_y):
             stdscr.addstr(start_y, appt_x, title, curses.color_pair(3) | curses.A_BOLD)
     except curses.error:
         pass
+
     y = start_y + 1
     if not appts:
         try:
@@ -808,6 +839,7 @@ def draw_appointments(stdscr, appointments, date_key, start_y):
         except curses.error:
             pass
         return
+
     for idx, appt in enumerate(appts, 1):
         if y >= h - 8:
             break
@@ -837,7 +869,7 @@ def draw_main_menu(stdscr):
             )
         except curses.error:
             pass
-    hint = "a/e/d = Appts   Arrows = Calendar"
+    hint = "a/e/d = Appts    Arrows = Calendar"
     try:
         stdscr.addstr(
             h - 2,
@@ -910,18 +942,62 @@ def main(stdscr):
 
         draw_logo(stdscr, theme_id)
 
-        # Determine where to start the table.
-        # If the window is small, start it right after the logo (line 7)
+        # Dynamic Layout Mode Trigger (Wide vs Vertical)
+        is_wide_layout = w >= 120 and h >= 25
         table_y = 7 if h < 35 else 8
-        table_bottom_y = draw_table(stdscr, todos, table_y)
-
         date_key = f"{cur_year}-{cur_month:02d}-{selected_day:02d}"
 
-        # Only draw calendar and appts if there is substantial vertical space left
-        if h > 25:
-            calendar_start_y = table_bottom_y + 1
-            draw_calendar(stdscr, calendar_start_y, selected_day, cur_year, cur_month)
-            draw_appointments(stdscr, appointments, date_key, calendar_start_y)
+        if is_wide_layout:
+            # --- SIDE-BY-SIDE LAYOUT ---
+            table_width = 68
+            cal_width = 42
+            spacing = 6
+            total_width = table_width + spacing + cal_width
+
+            # Center the combined block on the screen
+            table_x = max(0, (w - total_width) // 2)
+            cal_x = table_x + table_width + spacing
+
+            draw_table(stdscr, todos, table_y, start_x=table_x)
+
+            # Draw larger calendar next to table
+            cal_bottom_y = draw_calendar(
+                stdscr,
+                table_y,
+                start_x=cal_x,
+                selected_day=selected_day,
+                year=cur_year,
+                month=cur_month,
+                large=True,
+            )
+
+            # Appointments directly below calendar
+            draw_appointments(
+                stdscr,
+                appointments,
+                date_key,
+                cal_bottom_y + 2,
+                start_x=cal_x,
+                is_wide=True,
+            )
+
+        else:
+            # --- VERTICAL STACK LAYOUT (Default Fallback) ---
+            table_bottom_y = draw_table(stdscr, todos, table_y, start_x=None)
+
+            # Only draw calendar and appts if there is substantial vertical space left
+            if h > 25:
+                calendar_start_y = table_bottom_y + 1
+                draw_calendar(
+                    stdscr,
+                    calendar_start_y,
+                    start_x=None,
+                    selected_day=selected_day,
+                    year=cur_year,
+                    month=cur_month,
+                    large=False,
+                )
+                draw_appointments(stdscr, appointments, date_key, calendar_start_y)
 
         # Always try to draw the menu at the bottom
         if h > 15:
